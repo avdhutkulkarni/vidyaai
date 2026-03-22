@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <div style={{
-      minHeight:'100vh',
+      minHeight:'100dvh',
       background:'#F7F3EE',
       display:'flex',
       flexDirection:'column',
