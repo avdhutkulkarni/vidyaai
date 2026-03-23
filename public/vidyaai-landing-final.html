@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>VidyaAI — Your 24/7 AI Study Partner</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --cream:#F7F3EE;--white:#FFFFFF;--navy:#1A1A2E;
+  --saff:#D4591A;--saff2:#B84A12;--saff-l:#F5976A;
+  --saff-tint:rgba(212,89,26,.08);--saff-border:rgba(212,89,26,.16);
+  --green:#00875A;--text:#1A1A2E;--text2:#4A5568;--text3:#9AA2B8;
+  --border:rgba(26,26,46,.09);--shadow:rgba(26,26,46,.07);
+}
+html,body{height:100%;font-family:'Baloo 2',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 15%,rgba(212,89,26,.07) 0%,transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(212,89,26,.05) 0%,transparent 55%),radial-gradient(ellipse at 50% 0%,rgba(212,89,26,.04) 0%,transparent 40%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px calc(40px + env(safe-area-inset-bottom,0px));max-width:420px;margin:0 auto}
+
+/* LOGO */
+.logo-area{text-align:center;margin-bottom:28px;animation:fadeDown .7s cubic-bezier(.34,1.2,.64,1) both}
+.logo-ring{width:88px;height:88px;border-radius:24px;background:linear-gradient(145deg,#F5976A,#F9B47A);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative;box-shadow:0 0 0 1px var(--saff-border),0 8px 28px rgba(212,89,26,.2),0 2px 8px rgba(26,26,46,.06)}
+.logo-ring::before{content:'';position:absolute;inset:-1.5px;border-radius:25.5px;background:conic-gradient(from 180deg,transparent 0%,rgba(212,89,26,.5) 30%,rgba(245,151,106,.6) 55%,transparent 70%);z-index:-1;animation:spin 5s linear infinite}
+.logo-ico{font-size:40px;position:relative;z-index:1}
+.logo-name{font-family:'Sora',sans-serif;font-size:2.6rem;font-weight:800;letter-spacing:-1.5px;color:var(--navy);margin-bottom:8px;line-height:1}
+.logo-name span{background:linear-gradient(135deg,#D4591A,#F5976A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tagline{font-size:.92rem;color:var(--text2);line-height:1.5;font-weight:600;margin-bottom:10px}
+.class-pill{display:inline-flex;align-items:center;gap:5px;background:var(--saff-tint);border:1px solid var(--saff-border);border-radius:20px;padding:4px 13px;font-size:.72rem;font-weight:800;color:var(--saff2);letter-spacing:.3px}
+
+/* CARD */
+.card{width:100%;background:var(--white);border-radius:22px;padding:24px 22px;box-shadow:0 4px 24px var(--shadow),0 1px 3px rgba(26,26,46,.04);border:1px solid var(--border);margin-bottom:13px;animation:fadeUp .65s cubic-bezier(.34,1.2,.64,1) .15s both}
+
+/* GOOGLE BTN */
+.google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--white);border:1.5px solid #DADCE0;border-radius:12px;padding:13px 20px;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:700;color:var(--navy);cursor:pointer;transition:all .2s cubic-bezier(.34,1.2,.64,1);box-shadow:0 2px 8px rgba(26,26,46,.07);text-decoration:none;margin-bottom:14px}
+.google-btn:hover{box-shadow:0 5px 18px rgba(26,26,46,.12);transform:translateY(-1px);border-color:#C0C4CC}
+.google-btn:active{transform:scale(.98)}
+.google-ico{width:22px;height:22px;flex-shrink:0}
+.free-note{text-align:center;font-size:.72rem;color:var(--text3);line-height:1.6;font-weight:600}
+.free-note strong{color:var(--green);font-weight:800}
+
+/* FEATURES */
+.features{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;animation:fadeUp .65s cubic-bezier(.34,1.2,.64,1) .3s both}
+.feat{background:var(--white);border:1px solid var(--border);border-radius:15px;padding:14px 12px;box-shadow:0 2px 8px var(--shadow);transition:transform .18s;position:relative;overflow:hidden}
+.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:15px 15px 0 0}
+.feat.f1::before{background:linear-gradient(90deg,#D4591A,#F5976A)}
+.feat.f2::before{background:linear-gradient(90deg,#8B21A8,#CC44CC)}
+.feat.f3::before{background:linear-gradient(90deg,#CC7700,#FFAA00)}
+.feat.f4::before{background:linear-gradient(90deg,#00875A,#00CC88)}
+.feat:active{transform:scale(.97)}
+.feat-ico{font-size:1.4rem;margin-bottom:5px;display:block}
+.feat-title{font-family:'Sora',sans-serif;font-size:.75rem;font-weight:700;color:var(--navy);margin-bottom:3px}
+.feat-sub{font-size:.6rem;color:var(--text2);line-height:1.45;font-weight:600}
+
+/* TRUST */
+.trust{width:100%;text-align:center;animation:fadeUp .65s cubic-bezier(.34,1.2,.64,1) .45s both}
+.trust-board{display:inline-flex;align-items:center;gap:6px;background:rgba(0,135,90,.07);border:1px solid rgba(0,135,90,.14);border-radius:20px;padding:5px 14px;font-size:.68rem;font-weight:800;color:var(--green);margin-bottom:7px}
+.trust-sub{font-size:.65rem;color:var(--text3);font-weight:600;line-height:1.5}
+
+/* FOOTER */
+.footer{margin-top:16px;text-align:center;font-size:.6rem;color:var(--text3);font-weight:600;line-height:1.7;animation:fadeUp .65s ease .55s both}
+.footer a{color:var(--saff);text-decoration:none;font-weight:700}
+
+/* LOADING */
+.loading{display:none;flex-direction:column;align-items:center;gap:12px;padding:16px 0 4px}
+.loading.show{display:flex}
+.spinner{width:34px;height:34px;border:3px solid var(--saff-tint);border-top-color:var(--saff);border-radius:50%;animation:spin .7s linear infinite}
+.loading-txt{font-size:.8rem;color:var(--text2);font-weight:600}
+
+@keyframes fadeDown{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media(max-width:380px){.logo-name{font-size:2.2rem}.card{padding:20px 16px}.features{gap:7px}.feat{padding:12px 10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- LOGO -->
+  <div class="logo-area">
+    <div class="logo-ring"><div class="logo-ico">📚</div></div>
+    <div class="logo-name">Vidya<span>AI</span></div>
+    <div class="tagline">Your 24/7 AI-powered study partner</div>
+    <div class="class-pill">🎓 Class IX · X · XI · XII</div>
+  </div>
+
+  <!-- LOGIN CARD -->
+  <div class="card">
+    <div id="login-area">
+      <a class="google-btn" href="#" onclick="handleLogin(event)">
+        <svg class="google-ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Sign in with Google
+      </a>
+      <div class="free-note">
+        Start free · No credit card needed<br>
+        <strong>First topic always free ✓</strong>
+      </div>
+    </div>
+    <div class="loading" id="loading-area">
+      <div class="spinner"></div>
+      <div class="loading-txt">Signing you in...</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feat f1"><span class="feat-ico">🎯</span><div class="feat-title">Daily Mission</div><div class="feat-sub">AI plans your study path every morning</div></div>
+    <div class="feat f2"><span class="feat-ico">🤖</span><div class="feat-title">Ask Doubts 24/7</div><div class="feat-sub">Socratic AI that makes you think deeper</div></div>
+    <div class="feat f3"><span class="feat-ico">🎬</span><div class="feat-title">Animations</div><div class="feat-sub">See concepts come alive visually</div></div>
+    <div class="feat f4"><span class="feat-ico">🧘</span><div class="feat-title">Chitta Sthir</div><div class="feat-sub">Science-backed focus sessions</div></div>
+  </div>
+
+  <!-- TRUST -->
+  <div class="trust">
+    <div class="trust-board">✅ Maharashtra Board Aligned</div>
+    <div class="trust-sub">Built by a teacher · For students of Maharashtra</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    By signing in you agree to our <a href="#">Terms of Service</a><br>
+    vidyaai.in · Made with ❤️ in Maharashtra
+  </div>
+</div>
+<script>
+function handleLogin(e){
+  e.preventDefault();
+  document.getElementById('login-area').style.display='none';
+  document.getElementById('loading-area').classList.add('show');
+  // TODO: Replace with Firebase Google Auth
+  // import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+  // signInWithPopup(auth, new GoogleAuthProvider()).then(() => {
+  //   window.location.href = '/app';
+  // });
+  setTimeout(()=>{window.location.href='vidyaai-v12.html';},1500);
+}
+</script>
+</body>
+</html>
