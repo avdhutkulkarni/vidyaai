@@ -20,31 +20,12 @@ export default function VidyaAI() {
   }, [router])
 
   if (!ready) return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100vh',
-      background: '#070B12',
-      color: '#00D4FF',
-      fontFamily: 'sans-serif',
-      fontSize: '1rem'
-    }}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',background:'#070B12',color:'#00D4FF',fontFamily:'sans-serif'}}>
       Loading VidyaAI...
     </div>
   )
 
   return (
-    <iframe
-      src="/app.html"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        border: 'none',
-      }}
-    />
+    <iframe src="/app.html" style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',border:'none'}}/>
   )
 }
