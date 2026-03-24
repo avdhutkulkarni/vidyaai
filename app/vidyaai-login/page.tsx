@@ -8,13 +8,19 @@ export default function VidyaAILogin() {
   const router = useRouter()
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        const token = await user.getIdToken()
+        document.cookie = `vidyaai-auth=${token}; path=/; max-age=3600; SameSite=Lax`
         router.push('/vidyaai')
       } else {
         const provider = new GoogleAuthProvider()
         signInWithPopup(auth, provider)
-          .then(() => router.push('/vidyaai'))
+          .then(async (result) => {
+            const token = await result.user.getIdToken()
+            document.cookie = `vidyaai-auth=${token}; path=/; max-age=3600; SameSite=Lax`
+            router.push('/vidyaai')
+          })
           .catch(() => router.push('/'))
       }
     })
