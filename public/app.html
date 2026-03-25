@@ -401,7 +401,7 @@ body.day .exam-opt.on{background:rgba(0,85,204,.08);border-color:var(--e);color:
 .msg{display:flex;gap:7px;animation:fadeUp .25s ease}.msg.me{flex-direction:row-reverse}
 .mav{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;margin-top:2px}
 .msg.ai .mav{background:rgba(139,92,246,.1)}.msg.me .mav{background:linear-gradient(135deg,var(--e),var(--pur));font-size:.62rem;font-weight:800;color:#fff}
-.mbub{max-width:82%;padding:9px 11px;font-size:.76rem;line-height:1.7;border-radius:11px}
+ .mbub{max-width:82%;padding:9px 11px;font-size:.82rem;line-height:1.8;border-radius:11px}
 .msg.ai .mbub{background:var(--card);border:1px solid var(--b);border-radius:3px 11px 11px 11px}
 .msg.me .mbub{background:linear-gradient(135deg,var(--e),var(--e2));color:#fff;font-weight:500;border-radius:11px 3px 11px 11px}
 .mt{font-size:.54rem;color:var(--t3);margin-top:3px}
@@ -500,7 +500,8 @@ body.day .ct-land{background:linear-gradient(160deg,#E8F4F0,#EEF3F8,var(--bg))}
 @keyframes fillBar{from{width:0}to{width:100%}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-</style>
+ </style>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
 <body>
 <div id="app">
@@ -632,16 +633,7 @@ body.day .ct-land{background:linear-gradient(160deg,#E8F4F0,#EEF3F8,var(--bg))}
       </div>
     </div>
     <div style="text-align:center;font-size:.68rem;color:var(--t3);padding:12px 22px;font-weight:600">⚙️ Change anytime from Settings</div>
-    <div style="padding:0 22px;margin-bottom:14px">
-  <div style="font-size:.72rem;font-weight:800;color:var(--t2);margin-bottom:8px">🎯 Competitive Exam Target</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap" id="exam-toggle">
-    <div class="exam-opt on" id="eo-hsc" onclick="setExamOpt('HSC Board',this)">HSC Board</div>
-    <div class="exam-opt" id="eo-cet" onclick="setExamOpt('MHT-CET',this)">MHT-CET</div>
-    <div class="exam-opt" id="eo-neet" onclick="setExamOpt('NEET',this)" style="display:none">NEET</div>
-    <div class="exam-opt" id="eo-jee" onclick="setExamOpt('JEE Mains',this)" style="display:none">JEE Mains</div>
-  </div>
-</div>
-<button class="ss-cta2" onclick="startApp()">Start Learning ⚡</button>
+     <button class="ss-cta2" onclick="startApp()">Start Learning ⚡</button>
   </div>
 </div>
 
@@ -1158,8 +1150,8 @@ function pickStream(s,el){
   document.getElementById('ss-stream-sub').textContent=s==='maths'?'Maths Stream':'Bio Stream';
 }
 function afterStream(){
-  buildExamGoalScreen();
-  go('eg');
+  examGoal='MHT-CET'
+  startApp()
 }
 function buildExamGoalScreen(){
   const goals=selStream==='bio'
@@ -1520,7 +1512,8 @@ function handlePhoto(input){
       conversationHistory.push({role:'assistant',content:reply});
       if(conversationHistory.length>20)conversationHistory=conversationHistory.slice(-20);
       aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${formatReply(reply)}</div><div class="mt">Now</div><div class="fbr"><button class="fbb" onclick="fbGood(this)">👍 Got it!</button><button class="fbb" onclick="fbBad(this)">👎 Still confused</button></div></div>`;
-      box.scrollTop=box.scrollHeight;
+       box.scrollTop=box.scrollHeight;
+      if(window.MathJax)MathJax.typesetPromise([aiDiv]);
       xp('+1 XP');
     })
     .catch(()=>{
