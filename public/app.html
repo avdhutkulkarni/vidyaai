@@ -14,6 +14,8 @@
   --e:#00D4FF;--e2:#0099BB;
   --green:#00E87A;--amber:#FFB800;--red:#FF4D6A;--pur:#8B5CF6;
   --gold:#FFD700;--navy:#1A2744;
+  --academy:#E8830A;
+  --wm:rgba(255,255,255,0.03);
 }
 body.day{
   --bg:#F7F3EE;--bg2:#EDE8E0;--bg3:#E2DCD4;
@@ -23,12 +25,41 @@ body.day{
   --e:#0055CC;--e2:#003D99;
   --green:#00875A;--amber:#CC8800;--red:#CC2244;--pur:#6B21A8;
   --gold:#B8860B;
+  --academy:#C4620A;
+  --wm:rgba(0,0,0,0.03);
 }
 html{font-size:18px}html.fs-n{font-size:15px}html.fs-xxl{font-size:21px}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:'Baloo 2',sans-serif;background:var(--bg);color:var(--t1);position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden}
+body{font-family:'Baloo 2',sans-serif;background:var(--bg);color:var(--t1);position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;-webkit-user-select:none;user-select:none}
 .mr{font-family:'Tiro Devanagari Hindi',serif;font-size:1.05em;line-height:1.7}
 #app{width:100%;height:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);transition:background .3s;position:relative}
+
+/* WATERMARK */
+#app::before{
+  content:'VidyaAI  ·  Yash Science Academy';
+  position:fixed;top:0;left:0;width:200%;height:200%;
+  background:repeating-linear-gradient(
+    -30deg,
+    transparent,transparent 80px,
+    var(--wm) 80px,var(--wm) 82px
+  );
+  pointer-events:none;z-index:9990;
+  font-family:'Sora',sans-serif;font-size:11px;font-weight:700;
+  color:transparent;letter-spacing:1px;
+}
+.watermark-text{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:9989;overflow:hidden;
+}
+.watermark-text::before{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='150'%3E%3Ctext x='50%25' y='40%25' font-family='Arial' font-size='11' font-weight='bold' fill='rgba(255,255,255,0.04)' text-anchor='middle' transform='rotate(-30,150,75)'%3EVidyaAI%3C/text%3E%3Ctext x='50%25' y='70%25' font-family='Arial' font-size='9' font-weight='bold' fill='rgba(255,255,255,0.03)' text-anchor='middle' transform='rotate(-30,150,75)'%3EYash Science Academy%3C/text%3E%3C/svg%3E");
+  background-repeat:repeat;
+}
+body.day .watermark-text::before{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='150'%3E%3Ctext x='50%25' y='40%25' font-family='Arial' font-size='11' font-weight='bold' fill='rgba(0,0,0,0.04)' text-anchor='middle' transform='rotate(-30,150,75)'%3EVidyaAI%3C/text%3E%3Ctext x='50%25' y='70%25' font-family='Arial' font-size='9' font-weight='bold' fill='rgba(0,0,0,0.03)' text-anchor='middle' transform='rotate(-30,150,75)'%3EYash Science Academy%3C/text%3E%3C/svg%3E");
+}
+
 .scr{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);opacity:0;pointer-events:none;transform:translateX(16px);transition:opacity .22s,transform .22s;overflow:hidden}
 .scr.on{opacity:1;pointer-events:all;transform:translateX(0)}
 .scr.out{opacity:0;transform:translateX(-16px)}
@@ -42,18 +73,21 @@ body.day .ni.on .ni-ic{background:rgba(0,85,204,.1)}
 .ni-lb{font-size:8px;font-weight:800;color:var(--t3);letter-spacing:.3px;text-transform:uppercase}
 .ni.on .ni-lb{color:var(--e)}
 .ni-badge{position:absolute;top:-2px;right:2px;background:var(--red);color:#fff;font-size:7px;font-weight:800;padding:1px 3px;border-radius:8px;min-width:13px;text-align:center;line-height:13px}
-/* BACK BTN — clean white */
 .bk{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--b2);color:var(--t1);padding:6px 13px 6px 9px;border-radius:10px;font-family:'Sora',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .18s;margin-bottom:12px;width:fit-content;flex-shrink:0}
 .bk:active{transform:scale(.96)}
 body.day .bk{background:#fff;box-shadow:0 1px 6px rgba(26,39,68,.1)}
 #toast{position:fixed;top:12%;left:50%;transform:translateX(-50%) translateY(-10px);background:linear-gradient(135deg,var(--e),var(--pur));color:#fff;padding:8px 18px;border-radius:10px;font-family:'Sora',sans-serif;font-size:.78rem;font-weight:700;white-space:nowrap;z-index:9999;opacity:0;pointer-events:none;transition:all .28s cubic-bezier(.34,1.56,.64,1);box-shadow:0 6px 20px rgba(0,0,0,.22)}
 body.day #toast{color:#07090F}
 #toast.pop{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ACADEMY BADGE */
+.academy-badge{display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:800;color:var(--academy);letter-spacing:.3px;margin-bottom:3px}
+.academy-badge::before{content:'🏫';font-size:.7rem}
+
 /* MODAL */
 .modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal-sheet{background:var(--card2);border-radius:22px 22px 0 0;border-top:1px solid var(--b2);padding:22px 22px calc(28px + env(safe-area-inset-bottom,0px));width:100%;animation:slideUp .3s cubic-bezier(.34,1.2,.64,1)}
-body.day .modal-sheet{box-shadow:0 -4px 24px rgba(26,39,68,.12)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:36px;height:4px;background:var(--b2);border-radius:2px;margin:0 auto 16px}
 .modal-icon{font-size:2.6rem;text-align:center;margin-bottom:10px}
@@ -62,12 +96,11 @@ body.day .modal-sheet{box-shadow:0 -4px 24px rgba(26,39,68,.12)}
 body:not(.day) .modal-topic{background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.15)}
 .modal-sub{font-size:.76rem;color:var(--t2);text-align:center;line-height:1.7;margin-bottom:18px}
 .modal-close{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,var(--e),var(--e2));color:#fff;border:none;font-family:'Sora',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer}
-body.day .modal-close{color:#fff}
+
 /* SETTINGS */
 .help-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:299;display:none}
 .help-overlay.open{display:block}
 .settings-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--card2);border-radius:22px 22px 0 0;border-top:1px solid var(--b2);padding:16px 20px calc(24px + env(safe-area-inset-bottom,0px));z-index:300;transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.2,.64,1)}
-body.day .settings-sheet{box-shadow:0 -4px 24px rgba(26,39,68,.12)}
 .settings-sheet.open{transform:translateY(0)}
 .ss-title{font-family:'Sora',sans-serif;font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
 .ss-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--b)}
@@ -77,10 +110,10 @@ body.day .settings-sheet{box-shadow:0 -4px 24px rgba(26,39,68,.12)}
 .ss-toggle{display:flex;background:var(--card);border:1px solid var(--b2);border-radius:8px;padding:2px;gap:2px}
 .ss-opt{padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .18s;color:var(--t2)}
 .ss-opt.on{background:var(--e);color:#fff}
-body.day .ss-opt.on{color:#fff}
 .ss-input{width:100%;background:var(--card);border:1.5px solid var(--b2);border-radius:9px;padding:9px 11px;color:var(--t1);font-family:'Baloo 2',sans-serif;font-size:.82rem;outline:none;transition:border-color .18s;margin-top:6px}
 .ss-input:focus{border-color:var(--e)}
 .ss-input::placeholder{color:var(--t3)}
+
 /* SPLASH */
 #sp{justify-content:center;align-items:center;background:var(--bg)}
 .sp-ring{width:96px;height:96px;border-radius:26px;background:linear-gradient(135deg,#0D1828,#151E30);display:flex;align-items:center;justify-content:center;position:relative;animation:popIn .8s cubic-bezier(.34,1.56,.64,1) .3s both;box-shadow:0 0 0 1px rgba(0,212,255,.2),0 0 40px rgba(0,212,255,.1)}
@@ -88,24 +121,23 @@ body.day .ss-opt.on{color:#fff}
 .sp-ico{font-size:42px}
 .sp-word{font-family:'Sora',sans-serif;font-size:2.2rem;font-weight:800;letter-spacing:-1.5px;margin-top:20px;background:linear-gradient(135deg,#fff 30%,var(--e));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadeUp .6s ease .8s both}
 .sp-sub{font-size:.78rem;color:var(--t2);margin-top:6px;text-align:center;padding:0 28px;animation:fadeUp .6s ease 1s both}
-.sp-bar{width:110px;height:3px;background:var(--card2);border-radius:2px;margin-top:36px;overflow:hidden;animation:fadeUp .4s ease 1.1s both}
+.sp-academy{font-size:.65rem;color:var(--academy);font-weight:800;margin-top:8px;letter-spacing:.3px;animation:fadeUp .6s ease 1.1s both}
+.sp-bar{width:110px;height:3px;background:var(--card2);border-radius:2px;margin-top:28px;overflow:hidden;animation:fadeUp .4s ease 1.1s both}
 .sp-fill{height:100%;background:linear-gradient(90deg,var(--e),var(--pur));border-radius:2px;animation:fillBar 1.5s ease 1.2s forwards;width:0}
+
 /* CLASS SELECT */
 #cs{background:var(--bg)}
 .cs-head{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 46px) 22px 14px;background:linear-gradient(180deg,var(--bg2),transparent)}
 .cs-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.18);border-radius:20px;padding:3px 11px;font-size:.68rem;font-weight:800;color:var(--e);margin-bottom:10px;letter-spacing:.5px}
-body.day .cs-pill{background:rgba(0,85,204,.07);border-color:rgba(0,85,204,.18);color:var(--e)}
+body.day .cs-pill{background:rgba(0,85,204,.07);border-color:rgba(0,85,204,.18)}
 .cs-h{font-family:'Sora',sans-serif;font-size:1.55rem;font-weight:800;line-height:1.2;margin-bottom:5px}
 .cs-s{font-size:.76rem;color:var(--t2);line-height:1.55}
 .cs-set{display:flex;align-items:center;gap:6px;margin-top:10px}
 .set-btn{height:28px;padding:0 10px;background:var(--card2);border:1px solid var(--b2);border-radius:7px;cursor:pointer;font-family:'Baloo 2',sans-serif;font-size:.7rem;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap}
 .set-btn:active{transform:scale(.95)}
-body.day .set-btn{box-shadow:0 1px 4px rgba(26,39,68,.08)}
 .cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 22px}
 .ctile{background:var(--card);border:1.5px solid var(--b);border-radius:18px;padding:16px 12px 13px;cursor:pointer;transition:all .22s cubic-bezier(.34,1.2,.64,1);text-align:center;position:relative;overflow:hidden}
-body.day .ctile{box-shadow:0 2px 12px rgba(26,39,68,.07)}
 .ctile.sel{border-color:var(--e);box-shadow:0 0 0 1px rgba(0,212,255,.25),0 6px 22px rgba(0,212,255,.12);transform:scale(1.03)}
-body.day .ctile.sel{box-shadow:0 0 0 1px rgba(0,85,204,.25),0 6px 22px rgba(0,85,204,.1)}
 .ctile:active:not(.sel){transform:scale(.96)}
 .csym{width:56px;height:56px;border-radius:15px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px}
 .c-cls{font-family:'Sora',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:2px}
@@ -117,16 +149,14 @@ body.day .ctile.sel{box-shadow:0 0 0 1px rgba(0,85,204,.25),0 6px 22px rgba(0,85
 .cx.neet{background:rgba(0,232,122,.1);color:var(--green);border:1px solid rgba(0,232,122,.2)}
 .cx.jee{background:rgba(255,184,0,.1);color:var(--amber);border:1px solid rgba(255,184,0,.2)}
 .cx.brd{background:rgba(139,92,246,.1);color:var(--pur);border:1px solid rgba(139,92,246,.2)}
-body.day .cx.cet{background:rgba(0,85,204,.08);color:var(--e);border-color:rgba(0,85,204,.2)}
 .cs-cta{display:block;margin:4px 22px 24px;background:linear-gradient(135deg,var(--e),var(--e2));color:#fff;border:none;width:calc(100% - 44px);padding:13px;border-radius:13px;font-family:'Sora',sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;box-shadow:0 5px 20px rgba(0,212,255,.22);transition:all .18s}
-body.day .cs-cta{box-shadow:0 5px 20px rgba(0,85,204,.2)}
 .cs-cta:active{transform:scale(.98)}
+
 /* STREAM SELECT */
 #ss2{background:var(--bg)}
 .ss-head{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 46px) 22px 14px;background:linear-gradient(180deg,var(--bg2),transparent)}
 .stream-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 22px 0}
 .stile{background:var(--card);border:2px solid var(--b);border-radius:20px;padding:18px 14px 15px;cursor:pointer;transition:all .22s cubic-bezier(.34,1.2,.64,1);text-align:center}
-body.day .stile{box-shadow:0 2px 12px rgba(26,39,68,.07)}
 .stile.maths.sel{border-color:var(--amber);box-shadow:0 0 0 1px rgba(255,184,0,.25),0 6px 22px rgba(255,184,0,.12);transform:scale(1.03)}
 .stile.bio.sel{border-color:var(--green);box-shadow:0 0 0 1px rgba(0,232,122,.25),0 6px 22px rgba(0,232,122,.12);transform:scale(1.03)}
 .stile:active:not(.sel){transform:scale(.96)}
@@ -139,49 +169,54 @@ body.day .stile{box-shadow:0 2px 12px rgba(26,39,68,.07)}
 .st-subs{font-size:.62rem;color:var(--t2);line-height:1.6;margin-bottom:8px}
 .st-exams{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
 .ss-cta2{display:block;margin:14px 22px 24px;background:linear-gradient(135deg,var(--pur),#6D28D9);color:#fff;border:none;width:calc(100% - 44px);padding:13px;border-radius:13px;font-family:'Sora',sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;box-shadow:0 5px 20px rgba(139,92,246,.22);transition:all .18s}
-.ss-cta2:active{transform:scale(.98)}
+ .ss-cta2:active{transform:scale(.98)}
+.exam-opt{padding:7px 14px;border-radius:20px;font-size:.72rem;font-weight:800;cursor:pointer;border:1.5px solid var(--b2);color:var(--t2);transition:all .18s}
+.exam-opt.on{background:rgba(0,212,255,.1);border-color:var(--e);color:var(--e)}
+body.day .exam-opt.on{background:rgba(0,85,204,.08);border-color:var(--e);color:var(--e)}
+
+/* EXAM GOAL SELECT */
+#eg{background:var(--bg)}
+.eg-tile{background:var(--card);border:1.5px solid var(--b);border-radius:16px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .2s;margin-bottom:10px}
+.eg-tile.sel{border-color:var(--e);box-shadow:0 0 0 1px rgba(0,212,255,.2)}
+.eg-tile:active{transform:scale(.98)}
+.eg-ico{font-size:1.4rem;flex-shrink:0}
+.eg-name{font-family:'Sora',sans-serif;font-size:.9rem;font-weight:800;margin-bottom:2px}
+.eg-desc{font-size:.64rem;color:var(--t2);line-height:1.4}
+.eg-check{font-size:1rem;font-weight:800;color:var(--e);display:none}
+.eg-tile.sel .eg-check{display:block}
+
 /* HOME */
 #hm{background:var(--bg)}
 .hm-hero{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 20px 14px;background:linear-gradient(180deg,var(--bg2) 0%,transparent 100%)}
-body.day .hm-hero{background:linear-gradient(180deg,var(--bg2) 0%,transparent 100%)}
 .hm-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px}
-.hm-greet{font-size:.68rem;color:var(--t2);margin-bottom:2px;font-weight:600}
+.hm-greet{font-size:.68rem;color:var(--t2);margin-bottom:1px;font-weight:600}
+.hm-academy{font-size:.6rem;color:var(--academy);font-weight:800;margin-bottom:2px;letter-spacing:.2px}
 .hm-name{font-family:'Sora',sans-serif;font-size:1.28rem;font-weight:800;letter-spacing:-.3px}
 .hm-right{display:flex;align-items:center;gap:5px}
 .hm-ava{width:40px;height:40px;background:linear-gradient(135deg,var(--e),var(--pur));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:.95rem;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 3px 10px rgba(0,212,255,.22)}
 .gear-btn{width:32px;height:32px;background:var(--card2);border:1px solid var(--b2);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .18s}
-body.day .gear-btn{box-shadow:0 1px 4px rgba(26,39,68,.08)}
-/* Streak */
 .streak{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--b2);border-radius:13px;padding:10px 13px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
-body.day .streak{box-shadow:0 2px 12px rgba(26,39,68,.08)}
 .s-ico{font-size:1.35rem}
 .s-num{font-family:'Sora',sans-serif;font-size:.98rem;font-weight:800;color:var(--amber)}
 .s-txt{font-size:.6rem;color:var(--t2);margin-top:1px;font-weight:600}
 .xp-pill{margin-left:auto;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);border-radius:20px;padding:4px 10px;font-size:.66rem;font-weight:800;color:var(--pur)}
-body.day .xp-pill{background:rgba(107,33,168,.08);border-color:rgba(107,33,168,.18)}
-/* Daily Quote */
 .quote-strip{margin:8px 20px 0;padding:9px 13px;background:var(--card);border:1px solid var(--b);border-left:3px solid var(--e);border-radius:0 10px 10px 0;display:flex;align-items:flex-start;gap:8px}
-body.day .quote-strip{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .q-ico{font-size:.9rem;flex-shrink:0;margin-top:1px}
 .q-body{flex:1}
 .q-text{font-size:.7rem;color:var(--t2);line-height:1.55;font-style:italic}
 .q-text.mr{font-size:.68rem}
 .q-attr{font-size:.58rem;color:var(--t3);margin-top:3px;font-weight:700}
-/* Leaderboard peek */
 .lb-peek{margin:8px 20px 0;background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(139,92,246,.04));border:1px solid rgba(255,215,0,.16);border-radius:13px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px}
-body.day .lb-peek{background:linear-gradient(135deg,rgba(184,134,11,.07),rgba(107,33,168,.04));border-color:rgba(184,134,11,.2)}
 .lb-peek:active{transform:scale(.99)}
 .lb-ico{font-size:1.25rem;flex-shrink:0}
 .lb-rank{font-family:'Sora',sans-serif;font-size:.82rem;font-weight:800;color:var(--gold)}
 .lb-sub{font-size:.6rem;color:var(--t2);margin-top:2px}
 .lb-arrow{font-size:.8rem;color:var(--t3)}
-/* Mission */
 .slbl{padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center}
 .slbl-txt{font-size:.72rem;font-weight:800;color:var(--t1);letter-spacing:.2px;display:flex;align-items:center;gap:7px}
 .slbl-txt::before{content:'';display:block;width:3px;height:13px;border-radius:2px;background:var(--e);flex-shrink:0}
 .mission-wrap{padding:0 20px}
 .mission-header{background:var(--card);border:1px solid var(--b);border-radius:13px;padding:11px 13px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-body.day .mission-header{box-shadow:0 2px 8px rgba(26,39,68,.06)}
 .mh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
 .mh-label{font-size:.6rem;font-weight:800;color:var(--e);letter-spacing:.8px;text-transform:uppercase}
 .mh-date{font-size:.6rem;color:var(--t3)}
@@ -190,7 +225,6 @@ body.day .mission-header{box-shadow:0 2px 8px rgba(26,39,68,.06)}
 .mission-path{position:relative;padding-left:13px}
 .mission-path::before{content:'';position:absolute;left:4px;top:18px;bottom:55px;width:2px;background:repeating-linear-gradient(180deg,var(--b2) 0px,var(--b2) 5px,transparent 5px,transparent 11px)}
 .mstep{background:var(--card);border:1px solid var(--b);border-radius:13px;padding:12px 13px;margin-bottom:9px;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:all .2s}
-body.day .mstep{box-shadow:0 2px 8px rgba(26,39,68,.06)}
 .mstep:active{transform:scale(.99)}
 .mstep-top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
 .mstep-urgency{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -206,8 +240,7 @@ body.day .mstep{box-shadow:0 2px 8px rgba(26,39,68,.06)}
 .mstep-xp{font-size:.58rem;font-weight:800;color:var(--gold)}
 .mstep-btns{display:flex;gap:6px;padding-left:16px}
 .mstep-btn{flex:1;padding:8px 0;border-radius:9px;border:none;font-family:'Sora',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .18s;text-align:center}
-.mstep-btn.deep{background:linear-gradient(135deg,var(--e),var(--e2));color:#fff;box-shadow:0 3px 10px rgba(0,212,255,.2)}
-body.day .mstep-btn.deep{color:#fff}
+.mstep-btn.deep{background:linear-gradient(135deg,var(--e),var(--e2));color:#fff}
 .mstep-btn.single{background:linear-gradient(135deg,var(--e),var(--e2));color:#fff}
 .mstep-btn.continue{background:linear-gradient(135deg,var(--pur),#6D28D9);color:#fff}
 .mstep-btn:active{transform:scale(.97)}
@@ -215,44 +248,40 @@ body.day .mstep-btn.deep{color:#fff}
 .mstep.s1{border-left:3px solid var(--e)}.mstep.s2{border-left:3px solid var(--green)}.mstep.m1{border-left:3px solid var(--amber)}.mstep.m2{border-left:3px solid var(--pur)}
 .change-mission{width:100%;padding:9px;border-radius:10px;background:transparent;border:1.5px dashed var(--b2);color:var(--t3);font-family:'Baloo 2',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .18s;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px}
 .change-mission:hover{border-color:var(--e);color:var(--e)}
-/* Chitta nudge */
 .cs-nudge{background:linear-gradient(135deg,rgba(0,232,122,.06),rgba(0,212,255,.04));border:1px solid rgba(0,232,122,.14);border-radius:13px;padding:11px 13px;margin:0 20px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .18s}
-body.day .cs-nudge{background:linear-gradient(135deg,rgba(0,135,90,.06),rgba(0,85,204,.04));border-color:rgba(0,135,90,.15)}
 .cs-nudge:active{transform:scale(.99)}
 .cs-nudge-ico{font-size:1.4rem;flex-shrink:0}
 .cs-nudge-txt{flex:1}
 .cs-nudge-title{font-size:.78rem;font-weight:800;margin-bottom:1px}
 .cs-nudge-sub{font-size:.6rem;color:var(--t2)}
 .cs-nudge-btn{background:linear-gradient(135deg,var(--green),#00AA5A);color:#fff;border:none;padding:6px 11px;border-radius:8px;font-family:'Sora',sans-serif;font-size:.68rem;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0}
+
 /* LEARN */
 #sb{background:var(--bg)}
 .sb-hdr{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 20px 12px;background:linear-gradient(180deg,var(--bg2),transparent);display:flex;align-items:center;justify-content:space-between}
 .sb-title{font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:800}
 .subj-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:6px 20px 14px}
 .stile2{background:var(--card);border:1px solid var(--b);border-radius:15px;padding:15px 12px 12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-body.day .stile2{box-shadow:0 2px 10px rgba(26,39,68,.07)}
 .stile2::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:15px 15px 0 0}
 .stile2.py::after{background:var(--e)}.stile2.ch::after{background:var(--pur)}.stile2.ma::after{background:var(--amber)}.stile2.bi::after{background:var(--green)}
 .stile2.s1::after{background:var(--e)}.stile2.s2::after{background:var(--green)}.stile2.m1::after{background:var(--amber)}.stile2.m2::after{background:var(--pur)}
 .stile2:active{transform:scale(.97)}
 .stile2-ico{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:1.2rem}
 .stile2.py .stile2-ico,.stile2.s1 .stile2-ico{background:rgba(0,212,255,.09)}.stile2.ch .stile2-ico,.stile2.m2 .stile2-ico{background:rgba(139,92,246,.09)}.stile2.ma .stile2-ico,.stile2.m1 .stile2-ico{background:rgba(255,184,0,.09)}.stile2.bi .stile2-ico,.stile2.s2 .stile2-ico{background:rgba(0,232,122,.09)}
-body.day .stile2.py .stile2-ico,.stile2.s1 .stile2-ico{background:rgba(0,85,204,.08)}
 .stile2-nm{font-family:'Sora',sans-serif;font-size:.84rem;font-weight:800;margin-bottom:2px}
 .stile2.py .stile2-nm,.stile2.s1 .stile2-nm{color:var(--e)}.stile2.ch .stile2-nm,.stile2.m2 .stile2-nm{color:var(--pur)}.stile2.ma .stile2-nm,.stile2.m1 .stile2-nm{color:var(--amber)}.stile2.bi .stile2-nm,.stile2.s2 .stile2-nm{color:var(--green)}
 .stile2-inf{font-size:.58rem;color:var(--t2);margin-bottom:7px;line-height:1.4}
 .stile2-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:4px}
-body.day .stile2-bar{background:var(--bg3)}
 .stile2-fill{height:100%;border-radius:2px}
 .stile2.py .stile2-fill,.stile2.s1 .stile2-fill{background:var(--e)}.stile2.ch .stile2-fill,.stile2.m2 .stile2-fill{background:var(--pur)}.stile2.ma .stile2-fill,.stile2.m1 .stile2-fill{background:var(--amber)}.stile2.bi .stile2-fill,.stile2.s2 .stile2-fill{background:var(--green)}
 .stile2-pct{font-size:.58rem;color:var(--t3);font-weight:600}
+
 /* TOPICS */
 #tp{background:var(--bg)}
 .tp-hero{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 20px 14px;position:relative;overflow:hidden}
 .tp-glow{position:absolute;top:-50px;right:-50px;width:160px;height:160px;border-radius:50%;opacity:.12;filter:blur(32px);pointer-events:none}
 .tp-list{padding:8px 20px 14px}
 .topi{background:var(--card);border:1px solid var(--b);border-radius:11px;padding:10px 12px;margin-bottom:6px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:all .18s}
-body.day .topi{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .topi:active{transform:scale(.99)}
 .t-num{width:27px;height:27px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0}
 .py-n .t-num,.s1-n .t-num{background:rgba(0,212,255,.09);color:var(--e)}
@@ -265,18 +294,15 @@ body.day .topi{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .t-sub{font-size:.6rem;color:var(--t2);margin-top:2px;font-weight:600}
 .t-cs{background:rgba(255,184,0,.09);border:1px solid rgba(255,184,0,.18);color:var(--amber);font-size:.56rem;font-weight:800;padding:2px 7px;border-radius:6px;white-space:nowrap}
 .t-demo{background:rgba(0,212,255,.09);border:1px solid rgba(0,212,255,.18);color:var(--e);font-size:.56rem;font-weight:800;padding:2px 7px;border-radius:6px;white-space:nowrap}
-body.day .t-cs{background:rgba(204,136,0,.08);border-color:rgba(204,136,0,.2);color:var(--amber)}
-body.day .t-demo{background:rgba(0,85,204,.08);border-color:rgba(0,85,204,.2);color:var(--e)}
+
 /* MODES */
 #md{background:var(--bg)}
 .md-prog{background:var(--card);border:1px solid var(--b);border-radius:11px;padding:9px 13px;margin:0 20px 4px}
-body.day .md-prog{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .md-pr{display:flex;justify-content:space-between;margin-bottom:5px;font-size:.63rem;color:var(--t2);font-weight:600}.md-pr span{color:var(--e);font-weight:800}
 .md-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
 .md-fill{height:100%;background:linear-gradient(90deg,var(--e),var(--pur));border-radius:2px}
 .md-list{padding:7px 20px 12px}
 .mc{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:12px 13px;margin-bottom:7px;cursor:pointer;display:flex;align-items:center;gap:11px;transition:all .2s}
-body.day .mc{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .mc.lk{cursor:not-allowed}
 .mc:not(.lk):active{transform:scale(.98)}
 .mc-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0}
@@ -286,13 +312,13 @@ body.day .mc{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .mc-unlock{font-size:.56rem;color:var(--amber);margin-top:3px;font-weight:700}
 .mc-bd{font-size:.56rem;font-weight:700;padding:3px 7px;border-radius:7px;flex-shrink:0;white-space:nowrap}
 .mc-bd.lk-b{background:rgba(255,255,255,.04);color:var(--t3);border:1px solid var(--b)}
-body.day .mc-bd.lk-b{background:rgba(26,39,68,.04)}
 .story .mc-ico{background:rgba(255,184,0,.09)}.story .mc-nm{color:var(--amber)}.story .mc-bd:not(.lk-b){background:rgba(255,184,0,.1);color:var(--amber)}
 .solve .mc-ico{background:rgba(139,92,246,.09)}.solve .mc-nm{color:var(--pur)}.solve .mc-bd:not(.lk-b){background:rgba(139,92,246,.1);color:var(--pur)}
 .arena .mc-ico{background:rgba(255,77,106,.09)}.arena .mc-nm{color:var(--red)}.arena .mc-bd:not(.lk-b){background:rgba(255,77,106,.1);color:var(--red)}
 .pulse .mc-ico{background:rgba(0,232,122,.09)}.pulse .mc-nm{color:var(--green)}.pulse .mc-bd:not(.lk-b){background:rgba(0,232,122,.1);color:var(--green)}
 .rech .mc-ico{background:rgba(0,212,255,.06)}.rech .mc-nm{color:var(--e)}.rech .mc-bd:not(.lk-b){background:rgba(0,212,255,.07);color:var(--e)}
 .teach .mc-ico{background:rgba(139,92,246,.06)}.teach .mc-nm{color:var(--pur)}.teach .mc-bd:not(.lk-b){background:rgba(139,92,246,.07);color:var(--pur)}
+
 /* STORY */
 #st{background:var(--bg)}
 .st-hdr{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 20px 10px;background:linear-gradient(180deg,var(--bg2),transparent)}
@@ -305,15 +331,12 @@ body.day .mc-bd.lk-b{background:rgba(26,39,68,.04)}
 .st-explain-toggle{display:flex;background:var(--card2);border:1px solid var(--b2);border-radius:20px;padding:2px;gap:1px}
 .se-opt{padding:4px 9px;border-radius:18px;font-size:.62rem;font-weight:800;cursor:pointer;color:var(--t2);transition:all .15s;white-space:nowrap}
 .se-opt.on{background:var(--amber);color:#07090F}
-.lang-pill-row{display:flex;justify-content:flex-end;margin-bottom:8px}
 .lang-pill{display:flex;background:var(--card2);border:1px solid var(--b2);border-radius:20px;padding:2px;gap:1px}
-.lp-opt{padding:3px 9px;border-radius:18px;font-size:.62rem;font-weight:800;cursor:pointer;color:var(--t2);transition:all .15s}
+.lp-opt{padding:3px 9px;border-radius:18px;font-size:.62rem;font-weight:800;cursor:pointer;color:var(--t2);transition:all .15px}
 .lp-opt.mr-font{font-family:'Tiro Devanagari Hindi',serif;font-size:.7rem}
 .lp-opt.on{background:var(--e);color:#fff}
-body.day .lp-opt.on{color:#fff}
 .st-body{padding:0 20px 16px}
 .concept-card{background:var(--card);border:1px solid var(--b);border-radius:15px;padding:15px;margin-bottom:9px}
-body.day .concept-card{box-shadow:0 2px 10px rgba(26,39,68,.07)}
 .cc-step{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid var(--b)}
 .cc-step:last-child{border:none;padding-bottom:0}
 .cc-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;margin-top:2px}
@@ -328,17 +351,16 @@ body.day .concept-card{box-shadow:0 2px 10px rgba(26,39,68,.07)}
 .cc-text.exam-mode{font-style:italic;color:var(--t2)}
 .stuck-btn{width:100%;padding:10px;border-radius:10px;background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.16);color:var(--red);font-family:'Baloo 2',sans-serif;font-size:.76rem;font-weight:800;cursor:pointer;margin-bottom:9px;display:flex;align-items:center;justify-content:center;gap:7px}
 .gotit-btn{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,var(--green),#00AA5A);color:#fff;border:none;font-family:'Sora',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;margin-bottom:8px}
+
 /* LEADERBOARD */
 #lb{background:var(--bg)}
 .lb-hdr{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 20px 10px;background:linear-gradient(180deg,var(--bg2),transparent)}
 .lb-tabs{display:flex;background:var(--card);border:1px solid var(--b);border-radius:11px;padding:3px;gap:2px;margin-bottom:10px}
-body.day .lb-tabs{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .lb-tab{flex:1;padding:6px 0;text-align:center;border-radius:9px;font-size:.68rem;font-weight:800;cursor:pointer;color:var(--t3);transition:all .2s}
 .lb-tab.on{background:linear-gradient(135deg,var(--gold),#CC9400);color:#07090F}
 .lb-filter{display:flex;gap:5px;margin-bottom:12px}
 .lb-fil{padding:5px 11px;border-radius:20px;font-size:.65rem;font-weight:800;cursor:pointer;border:1.5px solid var(--b2);color:var(--t2);transition:all .18s}
 .lb-fil.on{background:rgba(255,215,0,.09);border-color:var(--gold);color:var(--gold)}
-body.day .lb-fil.on{background:rgba(184,134,11,.08);border-color:var(--gold);color:var(--gold)}
 .lb-my-rank{background:linear-gradient(135deg,rgba(255,215,0,.09),rgba(139,92,246,.07));border:1px solid rgba(255,215,0,.22);border-radius:13px;padding:11px 13px;margin-bottom:11px;display:flex;align-items:center;gap:11px}
 .lb-my-num{font-family:'Sora',sans-serif;font-size:1.9rem;font-weight:900;color:var(--gold)}
 .lb-my-info{flex:1}
@@ -347,7 +369,6 @@ body.day .lb-fil.on{background:rgba(184,134,11,.08);border-color:var(--gold);col
 .lb-my-xp{font-family:'Sora',sans-serif;font-size:.88rem;font-weight:800;color:var(--pur)}
 .lb-list{display:flex;flex-direction:column;gap:5px;padding:0 20px 14px}
 .lb-entry{background:var(--card);border:1px solid var(--b);border-radius:11px;padding:9px 12px;display:flex;align-items:center;gap:9px}
-body.day .lb-entry{box-shadow:0 1px 6px rgba(26,39,68,.05)}
 .lb-entry.me{border-color:rgba(255,215,0,.28);background:linear-gradient(90deg,rgba(255,215,0,.05),var(--card))}
 .lb-pos{font-family:'Sora',sans-serif;font-size:.82rem;font-weight:900;width:24px;text-align:center;flex-shrink:0}
 .lb-pos.gold{color:var(--gold)}.lb-pos.silver{color:#C0C0C0}.lb-pos.bronze{color:#CD7F32}
@@ -355,7 +376,8 @@ body.day .lb-entry{box-shadow:0 1px 6px rgba(26,39,68,.05)}
 .lb-expsub{font-size:.58rem;color:var(--t2);margin-top:1px;font-weight:600}
 .lb-exppill{font-size:.66rem;font-weight:800;color:var(--e)}
 .lb-streak-pill{font-size:.58rem;font-weight:700;color:var(--amber)}
-/* VIDYA AI */
+
+/* VIDYA AI CHAT */
 #ch{background:var(--bg)}
 .ch-hdr{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 16px 0;background:var(--bg2);border-bottom:1px solid var(--b2)}
 .ch-hdr-top{display:flex;align-items:center;gap:8px;padding-bottom:10px}
@@ -379,29 +401,48 @@ body.day .lb-entry{box-shadow:0 1px 6px rgba(26,39,68,.05)}
 .msg{display:flex;gap:7px;animation:fadeUp .25s ease}.msg.me{flex-direction:row-reverse}
 .mav{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;margin-top:2px}
 .msg.ai .mav{background:rgba(139,92,246,.1)}.msg.me .mav{background:linear-gradient(135deg,var(--e),var(--pur));font-size:.62rem;font-weight:800;color:#fff}
-.mbub{max-width:80%;padding:8px 10px;font-size:.75rem;line-height:1.6;border-radius:11px}
+.mbub{max-width:82%;padding:9px 11px;font-size:.76rem;line-height:1.7;border-radius:11px}
 .msg.ai .mbub{background:var(--card);border:1px solid var(--b);border-radius:3px 11px 11px 11px}
 .msg.me .mbub{background:linear-gradient(135deg,var(--e),var(--e2));color:#fff;font-weight:500;border-radius:11px 3px 11px 11px}
-body.day .msg.me .mbub{color:#fff}
-.mt{font-size:.54rem;color:var(--t3);margin-top:2px}
-.fbr{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
-.fbb{padding:3px 7px;border-radius:20px;border:1px solid var(--b);background:var(--bg3);font-size:.58rem;font-weight:700;color:var(--t2);cursor:pointer;transition:all .18s}
-.fbb:hover{border-color:var(--e);color:var(--e)}
+.mt{font-size:.54rem;color:var(--t3);margin-top:3px}
+.fbr{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.fbb{padding:4px 9px;border-radius:20px;border:1px solid var(--b);background:var(--bg3);font-size:.6rem;font-weight:700;color:var(--t2);cursor:pointer;transition:all .18s}
+.fbb:active{border-color:var(--e);color:var(--e)}
+
+/* OPTION BUTTONS */
+.opt-btn{display:block;width:100%;text-align:left;padding:9px 11px;margin:4px 0;background:var(--card2);border:1.5px solid var(--b2);border-radius:10px;color:var(--t1);font-family:'Baloo 2',sans-serif;font-size:.76rem;cursor:pointer;transition:all .18s;font-weight:600}
+.opt-btn:active{background:rgba(0,212,255,.08);border-color:var(--e);transform:scale(.98)}
+.opt-btn.selected{background:rgba(0,212,255,.1);border-color:var(--e);color:var(--e);font-weight:700}
+.opt-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* AI REPLY FORMATTING */
+.def-block{background:var(--bg3);border-left:3px solid var(--e);border-radius:0 8px 8px 0;padding:8px 10px;margin:6px 0;font-size:.74rem;line-height:1.6}
+.def-label{font-size:.58rem;font-weight:800;color:var(--e);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.exp-point{padding:3px 0 3px 10px;border-left:2px solid var(--b2);margin:3px 0;font-size:.74rem;line-height:1.55;color:var(--t1)}
+.section-label{font-size:.65rem;font-weight:800;margin:8px 0 4px;display:flex;align-items:center;gap:5px}
+.hint-block{background:rgba(255,184,0,.06);border:1px solid rgba(255,184,0,.15);border-radius:9px;padding:8px 10px;margin:6px 0}
+.sol-block{background:rgba(0,232,122,.06);border:1px solid rgba(0,232,122,.15);border-radius:9px;padding:8px 10px;margin:6px 0}
+.sol-step{font-size:.73rem;padding:3px 0;border-bottom:1px solid var(--b);line-height:1.55}
+.sol-step:last-child{border:none;font-weight:700;color:var(--green)}
+.action-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1px solid var(--b2);background:var(--bg3);font-size:.62rem;font-weight:700;color:var(--t2);cursor:pointer;transition:all .18s;margin:3px 3px 0 0}
+.action-btn:active{border-color:var(--e);color:var(--e)}
+.pyq-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.25);border-radius:6px;padding:2px 8px;font-size:.6rem;font-weight:800;color:var(--amber);margin-bottom:6px}
+
 .cinw{flex-shrink:0;padding:7px 12px;background:var(--bg2);border-top:1px solid var(--b);padding-bottom:max(9px,env(safe-area-inset-bottom,9px))}
 .cinr{display:flex;gap:5px;align-items:flex-end}
-.phb{width:34px;height:34px;flex-shrink:0;background:var(--card);border:1px solid var(--b);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem}
+.phb{width:34px;height:34px;flex-shrink:0;background:var(--card);border:1px solid var(--b);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .18s}
+.phb:active{background:var(--card2);border-color:var(--e)}
 .cin{flex:1;background:var(--card);border:1.5px solid var(--b);border-radius:9px;padding:8px 10px;color:var(--t1);font-family:'Baloo 2',sans-serif;font-size:.76rem;resize:none;outline:none;transition:border-color .18s;max-height:68px}
 .cin:focus{border-color:var(--e)}.cin::placeholder{color:var(--t3)}
 .sndb{width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg,var(--e),var(--e2));border:none;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem}
+
 /* PROGRESS */
 #pr{background:var(--bg)}
 .stg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
 .stt{background:var(--card);border:1px solid var(--b);border-radius:11px;padding:10px;text-align:center}
-body.day .stt{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .stn{font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:1px}
 .stl{font-size:.56rem;color:var(--t2);font-weight:600}
 .prc{background:var(--card);border:1px solid var(--b);border-radius:12px;padding:12px;margin-bottom:8px}
-body.day .prc{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .prct{font-size:.76rem;font-weight:800;margin-bottom:9px;display:flex;align-items:center;gap:6px}
 .trow{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--b)}
 .trow:last-child{border:none}
@@ -409,6 +450,7 @@ body.day .prc{box-shadow:0 1px 6px rgba(26,39,68,.06)}
 .tdot.g{background:var(--green)}.tdot.a{background:var(--amber)}.tdot.r{background:var(--red)}
 .tnm{flex:1;font-size:.72rem;font-weight:600}.tsc{font-size:.72rem;font-weight:800}
 .tsc.g{color:var(--green)}.tsc.a{color:var(--amber)}.tsc.r{color:var(--red)}
+
 /* CHITTA */
 #ct{background:var(--bg)}
 .ct-land{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 20px 16px;background:linear-gradient(160deg,#050D1A,#0A1530,var(--bg));text-align:center}
@@ -419,7 +461,6 @@ body.day .ct-land{background:linear-gradient(160deg,#E8F4F0,#EEF3F8,var(--bg))}
 .ct-start{display:block;margin:13px 20px 0;background:linear-gradient(135deg,var(--green),#00AA5A);color:#fff;border:none;width:calc(100% - 40px);padding:13px;border-radius:13px;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;text-align:center;transition:all .18s}
 .ct-bens{margin:11px 20px 0;display:flex;flex-direction:column;gap:5px}
 .ct-ben{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--b);border-radius:10px;padding:9px 11px}
-body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
 .ct-ben-ico{font-size:.95rem;flex-shrink:0}
 .ct-ben-txt{font-size:.7rem;color:var(--t2);line-height:1.4;font-weight:600}.ct-ben-txt strong{color:var(--t1)}
 #ct-s{background:var(--bg)}
@@ -453,6 +494,7 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
 .complete-rew-lbl{font-size:.62rem;font-weight:800;color:var(--green);letter-spacing:.8px;margin-bottom:4px}
 .complete-rew-val{font-family:'Sora',sans-serif;font-size:1rem;font-weight:800}
 .complete-back{width:100%;padding:11px;border-radius:10px;background:linear-gradient(135deg,var(--e),var(--e2));color:#fff;border:none;font-family:'Sora',sans-serif;font-size:.84rem;font-weight:800;cursor:pointer}
+
 @keyframes popIn{from{opacity:0;transform:scale(.4)rotate(-10deg)}to{opacity:1;transform:scale(1)rotate(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fillBar{from{width:0}to{width:100%}}
@@ -462,6 +504,7 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
 </head>
 <body>
 <div id="app">
+<div class="watermark-text"></div>
 <div id="toast"></div>
 
 <!-- MODAL -->
@@ -479,7 +522,6 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
 <!-- SETTINGS -->
 <div class="help-overlay" id="ss-overlay" onclick="closeSettings()"></div>
 <div class="settings-sheet" id="settings-sheet">
-  <div class="help-handle"></div>
   <div class="ss-title">⚙️ Settings <span onclick="closeSettings()" style="font-size:.8rem;color:var(--t2);cursor:pointer;font-weight:600">✕</span></div>
   <div class="ss-row">
     <div><div class="ss-label">Stream</div><div class="ss-sub" id="ss-stream-sub">Maths Stream</div></div>
@@ -503,13 +545,6 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
       <div class="ss-opt" id="ss-fxxl" onclick="setFont(2)">XXL</div>
     </div>
   </div>
-  <div class="ss-row" id="ss-stream-row" style="display:none">
-    <div><div class="ss-label">Class</div></div>
-    <div class="ss-toggle">
-      <div class="ss-opt on" id="ss-xi" onclick="changeClassSetting('xi')">XI</div>
-      <div class="ss-opt" id="ss-xii" onclick="changeClassSetting('xii')">XII</div>
-    </div>
-  </div>
   <div class="ss-row">
     <div>
       <div class="ss-label">📱 Parent WhatsApp</div>
@@ -527,6 +562,7 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
   <div class="sp-ring"><div class="sp-ico">📚</div></div>
   <div class="sp-word">VidyaAI</div>
   <div class="sp-sub">Your 24/7 smart study partner</div>
+  <div class="sp-academy">🏫 Yash Science Academy</div>
   <div class="sp-bar"><div class="sp-fill"></div></div>
 </div>
 
@@ -596,7 +632,29 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
       </div>
     </div>
     <div style="text-align:center;font-size:.68rem;color:var(--t3);padding:12px 22px;font-weight:600">⚙️ Change anytime from Settings</div>
-    <button class="ss-cta2" onclick="startApp()">Start Learning ⚡</button>
+    <div style="padding:0 22px;margin-bottom:14px">
+  <div style="font-size:.72rem;font-weight:800;color:var(--t2);margin-bottom:8px">🎯 Competitive Exam Target</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap" id="exam-toggle">
+    <div class="exam-opt on" id="eo-hsc" onclick="setExamOpt('HSC Board',this)">HSC Board</div>
+    <div class="exam-opt" id="eo-cet" onclick="setExamOpt('MHT-CET',this)">MHT-CET</div>
+    <div class="exam-opt" id="eo-neet" onclick="setExamOpt('NEET',this)" style="display:none">NEET</div>
+    <div class="exam-opt" id="eo-jee" onclick="setExamOpt('JEE Mains',this)" style="display:none">JEE Mains</div>
+  </div>
+</div>
+<button class="ss-cta2" onclick="startApp()">Start Learning ⚡</button>
+  </div>
+</div>
+
+<!-- EXAM GOAL SELECT -->
+<div class="scr" id="eg">
+  <div class="scroll">
+    <div style="padding:calc(env(safe-area-inset-top,0px) + 46px) 22px 14px;background:linear-gradient(180deg,var(--bg2),transparent)">
+      <div class="bk" onclick="go('ss2')" style="margin-bottom:14px">⬅ Back</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.18);border-radius:20px;padding:3px 11px;font-size:.68rem;font-weight:800;color:var(--pur);margin-bottom:10px">🎯 Exam Goal</div>
+      <div style="font-family:'Sora',sans-serif;font-size:1.45rem;font-weight:800;line-height:1.2;margin-bottom:5px">What are you<br>preparing for?</div>
+      <div style="font-size:.74rem;color:var(--t2);line-height:1.55">VidyaAI will personalise your answers and textbook based on this.</div>
+    </div>
+    <div id="eg-body" style="padding:0 22px 24px"></div>
   </div>
 </div>
 
@@ -606,13 +664,14 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
     <div class="hm-hero">
       <div class="hm-top">
         <div>
+          <div class="hm-academy">🏫 Yash Science Academy</div>
           <div class="hm-greet" id="gt">Good morning ☀️</div>
-          <div class="hm-name">Rahul Patil</div>
+          <div class="hm-name" id="hm-name-display">Student</div>
         </div>
         <div class="hm-right">
           <div class="gear-btn" onclick="openSettings()">⚙️</div>
           <div class="set-btn" id="fsb2" onclick="cycleFont()" style="height:26px;font-size:.62rem;padding:0 7px">A</div>
-          <div class="hm-ava" onclick="nav('pr')">R</div>
+          <div class="hm-ava" id="hm-ava-display" onclick="nav('pr')">S</div>
         </div>
       </div>
       <div class="streak">
@@ -621,8 +680,6 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
         <div class="xp-pill">⭐ 847 XP</div>
       </div>
     </div>
-
-    <!-- Daily Quote -->
     <div class="quote-strip" id="daily-quote">
       <div class="q-ico">💡</div>
       <div class="q-body">
@@ -630,8 +687,6 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
         <div class="q-attr" id="q-attr"></div>
       </div>
     </div>
-
-    <!-- Leaderboard peek -->
     <div class="lb-peek" onclick="nav('lb')">
       <div class="lb-ico">🏆</div>
       <div class="lb-txt">
@@ -640,7 +695,6 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
       </div>
       <div class="lb-arrow">›</div>
     </div>
-
     <div class="slbl"><div class="slbl-txt">🎯 Today's Mission</div></div>
     <div class="mission-wrap">
       <div class="mission-header">
@@ -703,7 +757,6 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
       </div>
       <button class="change-mission" onclick="nav('ch')">🤖 Ask Vidya AI to change my mission</button>
     </div>
-
     <div class="cs-nudge" onclick="nav('ct')">
       <div class="cs-nudge-ico">🧘</div>
       <div class="cs-nudge-txt">
@@ -743,13 +796,11 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
   <div class="tp-hero" id="tph" style="background:linear-gradient(160deg,#041525,#071E38,var(--bg))">
     <div class="tp-glow" id="tp-glow" style="background:var(--e)"></div>
     <div class="bk" onclick="go('sb')" style="margin-bottom:10px">⬅ Back</div>
-    <div style="font-size:.62rem;font-weight:800;letter-spacing:.9px;text-transform:uppercase;margin-bottom:3px" id="tpt" class=""></div>
+    <div style="font-size:.62rem;font-weight:800;letter-spacing:.9px;text-transform:uppercase;margin-bottom:3px" id="tpt"></div>
     <div style="font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:2px" id="tpc"></div>
     <div style="font-size:.68rem;color:var(--t2);font-weight:600">Tap any topic to begin</div>
   </div>
-  <div class="scroll">
-    <div class="tp-list" id="tpl"></div>
-  </div>
+  <div class="scroll"><div class="tp-list" id="tpl"></div></div>
   <div class="nav">
     <div class="ni" onclick="nav('hm')"><div class="ni-ic">🏠</div><div class="ni-lb">Home</div></div>
     <div class="ni on" onclick="nav('sb')"><div class="ni-ic">📚</div><div class="ni-lb">Learn</div></div>
@@ -816,31 +867,16 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
     <div class="st-body">
       <div style="font-family:'Sora',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:11px;color:var(--e)">Concept 1: Principle of Superposition</div>
       <div class="concept-card">
-        <div class="cc-step hook">
-          <div class="cc-ico">🪝</div>
-          <div><div class="cc-label">Hook</div><div class="cc-text" id="cc-hook">You are standing between two speakers at a concert. Sometimes the sound feels LOUD — sometimes almost silent. Same speakers. Same song. Why does the volume change just by moving 1 step?</div></div>
-        </div>
-        <div class="cc-step curiosity">
-          <div class="cc-ico">❓</div>
-          <div><div class="cc-label">Curiosity Question</div><div class="cc-text" id="cc-curiosity">When two waves meet at the same point — do they fight, add up, or pass through each other like ghosts?</div></div>
-        </div>
-        <div class="cc-step reveal">
-          <div class="cc-ico">💡</div>
-          <div><div class="cc-label" id="reveal-label">Reveal · Simple Mode</div><div class="cc-text" id="cc-reveal">They ADD UP! If both waves push same direction — BIG wave. If opposite — they cancel. Like two people pushing a swing together or against each other.</div></div>
-        </div>
-        <div class="cc-step formula">
-          <div class="cc-ico">🔢</div>
-          <div><div class="cc-label">Formula</div><div style="font-family:'Sora',sans-serif;font-size:.9rem;font-weight:700;color:var(--pur);margin-bottom:3px">y = y₁ + y₂</div><div class="cc-text" style="font-size:.7rem;color:var(--t2)">Resultant displacement = sum of individual displacements</div></div>
-        </div>
-        <div class="cc-step mnemonic">
-          <div class="cc-ico">🧠</div>
-          <div><div class="cc-label">Mnemonic</div><div class="cc-text" id="cc-mnemonic">"Waves are polite — they always ADD what they carry, then go their own way."</div></div>
-        </div>
+        <div class="cc-step hook"><div class="cc-ico">🪝</div><div><div class="cc-label">Hook</div><div class="cc-text" id="cc-hook">You are standing between two speakers at a concert. Sometimes the sound feels LOUD — sometimes almost silent. Same speakers. Same song. Why?</div></div></div>
+        <div class="cc-step curiosity"><div class="cc-ico">❓</div><div><div class="cc-label">Curiosity Question</div><div class="cc-text" id="cc-curiosity">When two waves meet — do they fight, add up, or pass through each other like ghosts?</div></div></div>
+        <div class="cc-step reveal"><div class="cc-ico">💡</div><div><div class="cc-label" id="reveal-label">Reveal · Simple Mode</div><div class="cc-text" id="cc-reveal">They ADD UP! Same direction = BIG wave. Opposite = they cancel. Like two people pushing a swing together or against each other.</div></div></div>
+        <div class="cc-step formula"><div class="cc-ico">🔢</div><div><div class="cc-label">Formula</div><div style="font-family:'Sora',sans-serif;font-size:.9rem;font-weight:700;color:var(--pur);margin-bottom:3px">y = y₁ + y₂</div><div class="cc-text" style="font-size:.7rem;color:var(--t2)">Resultant displacement = sum of individual displacements</div></div></div>
+        <div class="cc-step mnemonic"><div class="cc-ico">🧠</div><div><div class="cc-label">Mnemonic</div><div class="cc-text" id="cc-mnemonic">"Waves are polite — they always ADD what they carry, then go their own way."</div></div></div>
       </div>
       <button class="stuck-btn" onclick="nav('ch')">🤔 Stuck? Ask Vidya AI</button>
       <div class="concept-card">
         <div style="font-size:.6rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);margin-bottom:9px">🌍 Real World Connections</div>
-        <div style="font-size:.76rem;color:var(--t2);line-height:1.75;font-weight:600">🎸 Guitar strings — nodes and antinodes create musical notes<br>📡 Noise cancelling headphones — destructive interference cancels sound<br>🌊 Ocean waves meeting — visible superposition in water<br>📻 Radio signals — wave interference affects reception</div>
+        <div style="font-size:.76rem;color:var(--t2);line-height:1.75;font-weight:600">🎸 Guitar strings — nodes and antinodes create musical notes<br>📡 Noise cancelling headphones — destructive interference cancels sound<br>🌊 Ocean waves meeting — visible superposition in water</div>
       </div>
       <button class="gotit-btn" onclick="storyComplete()">✅ Theory Complete! +20 XP</button>
     </div>
@@ -867,7 +903,7 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
     <div style="padding:0 20px 4px">
       <div class="lb-my-rank">
         <div class="lb-my-num">#14</div>
-        <div class="lb-my-info"><div class="lb-my-name">Rahul P. — You ⭐</div><div class="lb-my-gap">89 XP to Top 10!</div></div>
+        <div class="lb-my-info"><div class="lb-my-name" id="lb-my-name-display">You ⭐</div><div class="lb-my-gap">89 XP to Top 10!</div></div>
         <div class="lb-my-xp">847 XP</div>
       </div>
     </div>
@@ -877,10 +913,7 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
       <div class="lb-entry"><div class="lb-pos gold">🥇</div><div><div class="lb-ename">Priya D.</div><div class="lb-expsub">Electrostatics complete</div></div><div style="margin-left:auto;text-align:right"><div class="lb-exppill">936 XP</div><div class="lb-streak-pill">🔥 18d</div></div></div>
       <div class="lb-entry"><div class="lb-pos silver">🥈</div><div><div class="lb-ename">Amit J.</div><div class="lb-expsub">Chemical Kinetics</div></div><div style="margin-left:auto;text-align:right"><div class="lb-exppill">912 XP</div><div class="lb-streak-pill">🔥 15d</div></div></div>
       <div class="lb-entry"><div class="lb-pos bronze">🥉</div><div><div class="lb-ename">Sneha M.</div><div class="lb-expsub">Differentiation done</div></div><div style="margin-left:auto;text-align:right"><div class="lb-exppill">889 XP</div><div class="lb-streak-pill">🔥 12d</div></div></div>
-      <div class="lb-entry"><div class="lb-pos" style="color:var(--t2)">4</div><div><div class="lb-ename">Rohan K.</div><div class="lb-expsub">Wave Optics</div></div><div style="margin-left:auto;text-align:right"><div class="lb-exppill">874 XP</div><div class="lb-streak-pill">🔥 9d</div></div></div>
-      <div class="lb-entry"><div class="lb-pos" style="color:var(--t2)">5</div><div><div class="lb-ename">Meera S.</div><div class="lb-expsub">Electrochemistry</div></div><div style="margin-left:auto;text-align:right"><div class="lb-exppill">861 XP</div><div class="lb-streak-pill">🔥 7d</div></div></div>
-      <div style="text-align:center;padding:8px;color:var(--t3);font-size:.65rem;font-weight:700">· · · 8 more students · · ·</div>
-      <div class="lb-entry me"><div class="lb-pos" style="color:var(--gold)">14</div><div><div class="lb-ename">Rahul P. ⭐ You</div><div class="lb-expsub">Superposition of Waves</div></div><div style="margin-left:auto;text-align:right"><div class="lb-exppill">847 XP</div><div class="lb-streak-pill">🔥 12d</div></div></div>
+      <div class="lb-entry me"><div class="lb-pos" style="color:var(--gold)">14</div><div><div class="lb-ename" id="lb-entry-name">You ⭐</div><div class="lb-expsub">Superposition of Waves</div></div><div style="margin-left:auto;text-align:right"><div class="lb-exppill">847 XP</div><div class="lb-streak-pill">🔥 12d</div></div></div>
     </div>
   </div>
   <div class="nav">
@@ -916,11 +949,12 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
   </div>
   <div id="panel-doubt" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
     <div class="msgs" id="msgs">
-      <div class="msg ai"><div class="mav">🤖</div><div><div class="mbub">Namaste Rahul! 🙏<br>I help you <strong>think</strong> — not just give answers.<br><br><div class="fbr"><button class="fbb" onclick="quickQ('Superposition of waves?')">Superposition?</button><button class="fbb" onclick="quickQ('Explain differentiation')">Differentiation?</button><button class="fbb" onclick="quickQ('Chemical kinetics rate law')">Rate Law?</button></div></div><div class="mt">Now</div></div></div>
+      <div class="msg ai"><div class="mav">🤖</div><div><div class="mbub" id="welcome-msg">Namaste! 🙏<br>I help you <strong>think</strong> — not just give answers.<br><br><div class="fbr"><button class="fbb" onclick="quickQ('Superposition of waves?')">Superposition?</button><button class="fbb" onclick="quickQ('Explain differentiation')">Differentiation?</button><button class="fbb" onclick="quickQ('Chemical kinetics rate law')">Rate Law?</button></div></div><div class="mt">Now</div></div></div>
     </div>
     <div class="cinw">
       <div class="cinr">
-        <div class="phb" onclick="xp('📸 Photo doubt — upload image!')">📷</div>
+        <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)">
+        <div class="phb" onclick="document.getElementById('photo-input').click()">📷</div>
         <textarea class="cin" id="ci" placeholder="Type your doubt..." rows="1" onkeydown="ck(event)"></textarea>
         <button class="sndb" onclick="send()">➤</button>
       </div>
@@ -965,15 +999,6 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
         <div class="trow"><div class="tdot g"></div><div class="tnm">Wave Optics</div><div class="tsc g">Done ✓</div></div>
         <div class="trow"><div class="tdot r"></div><div class="tnm">Electrostatics</div><div class="tsc r">Not started</div></div>
       </div>
-      <div class="prc">
-        <div class="prct" style="color:var(--pur)">🧪 Chemistry XII</div>
-        <div class="trow"><div class="tdot a"></div><div class="tnm">Chemical Kinetics</div><div class="tsc a">Arena 70%</div></div>
-        <div class="trow"><div class="tdot r"></div><div class="tnm">Electrochemistry</div><div class="tsc r">Not started</div></div>
-      </div>
-      <div class="prc">
-        <div class="prct" style="color:var(--amber)">📐 Maths XII</div>
-        <div class="trow"><div class="tdot r"></div><div class="tnm">Differentiation</div><div class="tsc r">Not started</div></div>
-      </div>
     </div>
   </div>
   <div class="nav">
@@ -1000,7 +1025,7 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
       <div class="ct-ben"><div class="ct-ben-ico">🏃</div><div class="ct-ben-txt"><strong>Phase 2 · Move</strong> · 4 min</div></div>
       <div class="ct-ben"><div class="ct-ben-ico">🍽️</div><div class="ct-ben-txt"><strong>Phase 3 · Fuel Check</strong> · 3 min</div></div>
       <div class="ct-ben"><div class="ct-ben-ico">🎯</div><div class="ct-ben-txt"><strong>Phase 4 · Intention</strong> · 3 min</div></div>
-      <div class="ct-ben"><div class="ct-ben-ico">⚡</div><div class="ct-ben-txt"><strong>Phase 5 · Ready!</strong> · 2 min — +2 Doubts + 10 XP</div></div>
+      <div class="ct-ben"><div class="ct-ben-ico">⚡</div><div class="ct-ben-txt"><strong>Phase 5 · Ready!</strong> · 2 min</div></div>
     </div>
     <div style="height:18px"></div>
   </div>
@@ -1028,33 +1053,36 @@ body.day .ct-ben{box-shadow:0 1px 4px rgba(26,39,68,.05)}
 
 </div>
 <script>
+// ══ READ STUDENT NAME FROM URL ══
+function getParam(k){try{return decodeURIComponent(new URLSearchParams(window.location.search).get(k)||'')}catch{return ''}}
+const STUDENT_NAME = getParam('name') || 'Student'
+const STUDENT_LB = getParam('lbname') || 'Student'
+
+// ══ STATE ══
+let cur='sp', selCls='xii', selStream='maths', examGoal='HSC Board',
+    lang='en', wantsMarathi=false, explainMode='simple', dark=true, fi=1,
+    thumbsDownCount=0, conversationHistory=[], curSubj=null
+let tt, sP=0, sIv, sS=0, sTot=0
+
 // ══ QUOTES ══
 const QUOTES=[
-  {text:"The important thing is not to stop questioning. Curiosity has its own reason for existing.",attr:"— Albert Einstein",type:"sci"},
+  {text:"The important thing is not to stop questioning.",attr:"— Albert Einstein",type:"sci"},
   {text:"In mathematics, the art of asking questions is more valuable than solving problems.",attr:"— Georg Cantor",type:"math"},
   {text:"Science is not only a disciple of reason but also one of romance and passion.",attr:"— Stephen Hawking",type:"sci"},
   {text:"Pure mathematics is, in its way, the poetry of logical ideas.",attr:"— Albert Einstein",type:"math"},
   {text:"An investment in knowledge pays the best interest.",attr:"— Benjamin Franklin",type:"gen"},
-  {text:"Equipped with his five senses, man explores the universe around him and calls the adventure Science.",attr:"— Edwin Hubble",type:"sci"},
   {text:"Do not worry about your difficulties in mathematics. I can assure you mine are still greater.",attr:"— Albert Einstein",type:"math"},
   {text:"Education is the most powerful weapon which you can use to change the world.",attr:"— Nelson Mandela",type:"gen"},
   {text:"The more I learn, the more I realize how much I don't know.",attr:"— Albert Einstein",type:"sci"},
-  {text:"Life is like riding a bicycle. To keep your balance you must keep moving.",attr:"— Albert Einstein",type:"gen"},
   {text:"Strength does not come from physical capacity. It comes from an indomitable will.",attr:"— Mahatma Gandhi",type:"gen"},
-  {text:"You are never too old to set another goal or to dream a new dream.",attr:"— C.S. Lewis",type:"gen"},
   {text:"Mathematics is the music of reason.",attr:"— James Joseph Sylvester",type:"math"},
-  {text:"The nitrogen in our DNA, the calcium in our teeth, the iron in our blood — we are made of starstuff.",attr:"— Carl Sagan",type:"sci"},
-  {text:"First, have a definite, clear practical ideal — a goal, an objective.",attr:"— Aristotle",type:"gen"},
-  {text:"माझ्या आयुष्यात मला शिक्षण हेच सर्वात मोठे शस्त्र वाटते.",attr:"— डॉ. ए.पी.जे. अब्दुल कलाम",type:"gen",mr:true},
-  {text:"संख्यांमध्ये सौंदर्य आहे — जे डोळ्यांनी नाही, मनाने दिसते.",attr:"— आर्यभट्ट",type:"math",mr:true},
-  {text:"अपयश हे यशाच्या मार्गावरील एक पाऊल आहे.",attr:"— स्वामी विवेकानंद",type:"gen",mr:true},
-  {text:"Geometry is the archetype of the beauty of the world.",attr:"— Johannes Kepler",type:"math"},
-  {text:"Nothing in life is to be feared, only to be understood. Now is the time to understand more, so that we may fear less.",attr:"— Marie Curie",type:"sci"},
+  {text:"Nothing in life is to be feared, only to be understood.",attr:"— Marie Curie",type:"sci"},
   {text:"The good thing about science is that it's true whether or not you believe in it.",attr:"— Neil deGrasse Tyson",type:"sci"},
-  {text:"एक छोटी सुरुवात मोठ्या यशाची पहाट असते.",attr:"— संत तुकाराम",type:"gen",mr:true},
+  {text:"माझ्या आयुष्यात मला शिक्षण हेच सर्वात मोठे शस्त्र वाटते.",attr:"— डॉ. ए.पी.जे. अब्दुल कलाम",type:"gen",mr:true},
+  {text:"अपयश हे यशाच्या मार्गावरील एक पाऊल आहे.",attr:"— स्वामी विवेकानंद",type:"gen",mr:true},
 ];
 
-// ══ ALL SUBJECTS DATA ══
+// ══ SUBJECTS ══
 const SUBJECTS={
   'xii-maths':{
     phy:{name:'Physics XII',icon:'⚡',col:'py',tag:'PHYSICS XII',cnt:'16 Chapters',nc:'py-n',color:'var(--e)',bg:'linear-gradient(160deg,#041525,#071E38,var(--bg))',chapters:['Rotational Dynamics','Mechanical Properties of Fluids','Kinetic Theory of Gases and Radiation','Thermodynamics','Oscillations','Superposition of Waves','Wave Optics','Electrostatics','Current Electricity','Magnetic Fields due to Electric Current','Magnetic Materials','Electromagnetic Induction','AC Circuits','Dual Nature of Radiation and Matter','Structure of Atoms and Nuclei','Semiconductor Devices']},
@@ -1079,57 +1107,109 @@ const SUBJECTS={
     bi:{name:'Biology XI',icon:'🌿',col:'bi',tag:'BIOLOGY XI',cnt:'16 Chapters',nc:'bi-n',color:'var(--green)',bg:'linear-gradient(160deg,#021608,#031E0A,var(--bg))',chapters:['Living World','Systematics of Living Organisms','Kingdom Plantae','Kingdom Animalia','Cell Structure and Organization','Biomolecules','Cell Division','Plant Tissues and Anatomy','Morphology of Flowering Plants','Animal Tissue','Study of Animal Type: Cockroach','Photosynthesis','Respiration and Energy Transfer','Human Nutrition','Excretion and Osmoregulation','Skeleton and Movement']}
   },
   ix:{
-    s1:{name:'Science 1',icon:'🔬',col:'s1',tag:'SCIENCE 1 — CLASS IX',cnt:'9 Chapters',nc:'s1-n',color:'var(--e)',bg:'linear-gradient(160deg,#041525,#071E38,var(--bg))',
-      chapters:['Laws of Motion','Work and Energy','Current Electricity','Measurement of Matter','Acids, Bases and Salts','Reflection of Light','Study of Sound','Carbon: An Important Element','Substances in Common Use'],
-      mr:['गतीचे नियम','कार्य आणि ऊर्जा','धाराविद्युत','द्रव्याचे मोजमाप','आम्ल, आम्लारी व क्षार','प्रकाशाचे परावर्तन','ध्वनीचा अभ्यास','कार्बन : एक महत्त्वाचे मूलद्रव्य','पदार्थ आपल्या वापरातील']},
-    s2:{name:'Science 2',icon:'🌿',col:'s2',tag:'SCIENCE 2 — CLASS IX',cnt:'9 Chapters',nc:'s2-n',color:'var(--green)',bg:'linear-gradient(160deg,#021608,#031E0A,var(--bg))',
-      chapters:['Classification of Plants','Energy Flow in an Ecosystem','Useful and Harmful Microbes','Environmental Management','Information Communication Technology','Life Processes in Living Organisms','Heredity and Variation','Introduction to Biotechnology','Observing Space: Telescopes'],
-      mr:['वनस्पतींचे वर्गीकरण','परिसंस्थेतील ऊर्जाप्रवाह','उपयुक्त व उपद्रवी सूक्ष्मजीव','पर्यावरणीय व्यवस्थापन','माहिती संप्रेषण तंत्रज्ञान','सजीवांमधील जीवनप्रक्रिया','आनुवंशिकता व परिवर्तन','जैवतंत्रज्ञानाची ओळख','अवकाश निरीक्षण : दुर्बिणी']},
-    m1:{name:'Maths 1 — Algebra',icon:'📐',col:'m1',tag:'MATHS 1 — CLASS IX',cnt:'7 Chapters',nc:'m1-n',color:'var(--amber)',bg:'linear-gradient(160deg,#1A0E00,#251500,var(--bg))',
-      chapters:['Sets','Real Numbers','Polynomials','Ratio and Proportion','Linear Equations in Two Variables','Financial Planning','Statistics'],
-      mr:['संच','वास्तव संख्या','बहुपदी','गुणोत्तर व प्रमाण','दोन चलांतील रेषीय समीकरणे','अर्थनियोजन','सांख्यिकी']},
-    m2:{name:'Maths 2 — Geometry',icon:'📊',col:'m2',tag:'MATHS 2 — CLASS IX',cnt:'9 Chapters',nc:'m2-n',color:'var(--pur)',bg:'linear-gradient(160deg,#120826,#1A0A32,var(--bg))',
-      chapters:['Basic Concepts in Geometry','Parallel Lines','Triangles','Constructions of Triangles','Quadrilaterals','Circle','Co-ordinate Geometry','Trigonometry','Surface Area and Volume'],
-      mr:['भूमितीतील मूलभूत संबोध','समांतर रेषा','त्रिकोण','त्रिकोण रचना','चौकोन','वर्तुळ','निर्देशक भूमिती','त्रिकोणमिती','पृष्ठफळ व घनफळ']}
+    s1:{name:'Science 1',icon:'🔬',col:'s1',tag:'SCIENCE 1 — CLASS IX',cnt:'9 Chapters',nc:'s1-n',color:'var(--e)',bg:'linear-gradient(160deg,#041525,#071E38,var(--bg))',chapters:['Laws of Motion','Work and Energy','Current Electricity','Measurement of Matter','Acids, Bases and Salts','Reflection of Light','Study of Sound','Carbon: An Important Element','Substances in Common Use'],mr:['गतीचे नियम','कार्य आणि ऊर्जा','धाराविद्युत','द्रव्याचे मोजमाप','आम्ल, आम्लारी व क्षार','प्रकाशाचे परावर्तन','ध्वनीचा अभ्यास','कार्बन : एक महत्त्वाचे मूलद्रव्य','पदार्थ आपल्या वापरातील']},
+    s2:{name:'Science 2',icon:'🌿',col:'s2',tag:'SCIENCE 2 — CLASS IX',cnt:'9 Chapters',nc:'s2-n',color:'var(--green)',bg:'linear-gradient(160deg,#021608,#031E0A,var(--bg))',chapters:['Classification of Plants','Energy Flow in an Ecosystem','Useful and Harmful Microbes','Environmental Management','Information Communication Technology','Life Processes in Living Organisms','Heredity and Variation','Introduction to Biotechnology','Observing Space: Telescopes'],mr:['वनस्पतींचे वर्गीकरण','परिसंस्थेतील ऊर्जाप्रवाह','उपयुक्त व उपद्रवी सूक्ष्मजीव','पर्यावरणीय व्यवस्थापन','माहिती संप्रेषण तंत्रज्ञान','सजीवांमधील जीवनप्रक्रिया','आनुवंशिकता व परिवर्तन','जैवतंत्रज्ञानाची ओळख','अवकाश निरीक्षण : दुर्बिणी']},
+    m1:{name:'Maths 1 — Algebra',icon:'📐',col:'m1',tag:'MATHS 1 — CLASS IX',cnt:'7 Chapters',nc:'m1-n',color:'var(--amber)',bg:'linear-gradient(160deg,#1A0E00,#251500,var(--bg))',chapters:['Sets','Real Numbers','Polynomials','Ratio and Proportion','Linear Equations in Two Variables','Financial Planning','Statistics'],mr:['संच','वास्तव संख्या','बहुपदी','गुणोत्तर व प्रमाण','दोन चलांतील रेषीय समीकरणे','अर्थनियोजन','सांख्यिकी']},
+    m2:{name:'Maths 2 — Geometry',icon:'📊',col:'m2',tag:'MATHS 2 — CLASS IX',cnt:'9 Chapters',nc:'m2-n',color:'var(--pur)',bg:'linear-gradient(160deg,#120826,#1A0A32,var(--bg))',chapters:['Basic Concepts in Geometry','Parallel Lines','Triangles','Constructions of Triangles','Quadrilaterals','Circle','Co-ordinate Geometry','Trigonometry','Surface Area and Volume'],mr:['भूमितीतील मूलभूत संबोध','समांतर रेषा','त्रिकोण','त्रिकोण रचना','चौकोन','वर्तुळ','निर्देशक भूमिती','त्रिकोणमिती','पृष्ठफळ व घनफळ']}
   },
   x:{
-    s1:{name:'Science 1',icon:'🔬',col:'s1',tag:'SCIENCE 1 — CLASS X',cnt:'10 Chapters',nc:'s1-n',color:'var(--e)',bg:'linear-gradient(160deg,#041525,#071E38,var(--bg))',
-      chapters:['Gravitation','Periodic Classification of Elements','Chemical Reactions and Equations','Effects of Electric Current','Heat','Refraction of Light','Lenses','Metallurgy','Carbon Compounds','Space Missions'],
-      mr:['गुरुत्वाकर्षण','मूलद्रव्यांची आवर्ती वर्गीकरण','रासायनिक अभिक्रिया व समीकरणे','विद्युतधारेचे परिणाम','उष्णता','प्रकाशाचे अपवर्तन','भिंगे व त्यांचे उपयोग','धातुविज्ञान','कार्बनी संयुगे','अवकाश मोहीमा']},
-    s2:{name:'Science 2',icon:'🌿',col:'s2',tag:'SCIENCE 2 — CLASS X',cnt:'10 Chapters',nc:'s2-n',color:'var(--green)',bg:'linear-gradient(160deg,#021608,#031E0A,var(--bg))',
-      chapters:['Heredity and Evolution','Life Processes in Living Organisms Part 1','Life Processes in Living Organisms Part 2','Environmental Management','Towards Green Energy','Animal Classification','Introduction to Microbiology','Cell Biology and Biotechnology','Social Health','Disaster Management'],
-      mr:['आनुवंशिकता व उत्क्रांती','सजीवांतील जीवनप्रक्रिया भाग-1','सजीवांतील जीवनप्रक्रिया भाग-2','पर्यावरणीय व्यवस्थापन','हरित ऊर्जेच्या दिशेने','प्राण्यांचे वर्गीकरण','ओळख सूक्ष्मजीवशास्त्राची','पेशीविज्ञान व जैवतंत्रज्ञान','सामाजिक आरोग्य','आपत्ती व्यवस्थापन']},
-    m1:{name:'Maths 1 — Algebra',icon:'📐',col:'m1',tag:'MATHS 1 — CLASS X',cnt:'6 Chapters',nc:'m1-n',color:'var(--amber)',bg:'linear-gradient(160deg,#1A0E00,#251500,var(--bg))',
-      chapters:['Linear Equations in Two Variables','Quadratic Equations','Arithmetic Progression','Financial Planning','Probability','Statistics'],
-      mr:['दोन चलांतील रेषीय समीकरणे','वर्गसमीकरणे','अंकगणित श्रेढी','अर्थनियोजन','संभाव्यता','सांख्यिकी']},
-    m2:{name:'Maths 2 — Geometry',icon:'📊',col:'m2',tag:'MATHS 2 — CLASS X',cnt:'7 Chapters',nc:'m2-n',color:'var(--pur)',bg:'linear-gradient(160deg,#120826,#1A0A32,var(--bg))',
-      chapters:['Similarity','Pythagoras Theorem','Circle','Geometric Constructions','Co-ordinate Geometry','Trigonometry','Mensuration'],
-      mr:['समरूपता','पायथागोरसचे प्रमेय','वर्तुळ','भौमितिक रचना','निर्देशक भूमिती','त्रिकोणमिती','महत्वमापन']}
+    s1:{name:'Science 1',icon:'🔬',col:'s1',tag:'SCIENCE 1 — CLASS X',cnt:'10 Chapters',nc:'s1-n',color:'var(--e)',bg:'linear-gradient(160deg,#041525,#071E38,var(--bg))',chapters:['Gravitation','Periodic Classification of Elements','Chemical Reactions and Equations','Effects of Electric Current','Heat','Refraction of Light','Lenses','Metallurgy','Carbon Compounds','Space Missions'],mr:['गुरुत्वाकर्षण','मूलद्रव्यांची आवर्ती वर्गीकरण','रासायनिक अभिक्रिया व समीकरणे','विद्युतधारेचे परिणाम','उष्णता','प्रकाशाचे अपवर्तन','भिंगे व त्यांचे उपयोग','धातुविज्ञान','कार्बनी संयुगे','अवकाश मोहीमा']},
+    s2:{name:'Science 2',icon:'🌿',col:'s2',tag:'SCIENCE 2 — CLASS X',cnt:'10 Chapters',nc:'s2-n',color:'var(--green)',bg:'linear-gradient(160deg,#021608,#031E0A,var(--bg))',chapters:['Heredity and Evolution','Life Processes in Living Organisms Part 1','Life Processes in Living Organisms Part 2','Environmental Management','Towards Green Energy','Animal Classification','Introduction to Microbiology','Cell Biology and Biotechnology','Social Health','Disaster Management'],mr:['आनुवंशिकता व उत्क्रांती','सजीवांतील जीवनप्रक्रिया भाग-1','सजीवांतील जीवनप्रक्रिया भाग-2','पर्यावरणीय व्यवस्थापन','हरित ऊर्जेच्या दिशेने','प्राण्यांचे वर्गीकरण','ओळख सूक्ष्मजीवशास्त्राची','पेशीविज्ञान व जैवतंत्रज्ञान','सामाजिक आरोग्य','आपत्ती व्यवस्थापन']},
+    m1:{name:'Maths 1 — Algebra',icon:'📐',col:'m1',tag:'MATHS 1 — CLASS X',cnt:'6 Chapters',nc:'m1-n',color:'var(--amber)',bg:'linear-gradient(160deg,#1A0E00,#251500,var(--bg))',chapters:['Linear Equations in Two Variables','Quadratic Equations','Arithmetic Progression','Financial Planning','Probability','Statistics'],mr:['दोन चलांतील रेषीय समीकरणे','वर्गसमीकरणे','अंकगणित श्रेढी','अर्थनियोजन','संभाव्यता','सांख्यिकी']},
+    m2:{name:'Maths 2 — Geometry',icon:'📊',col:'m2',tag:'MATHS 2 — CLASS X',cnt:'7 Chapters',nc:'m2-n',color:'var(--pur)',bg:'linear-gradient(160deg,#120826,#1A0A32,var(--bg))',chapters:['Similarity','Pythagoras Theorem','Circle','Geometric Constructions','Co-ordinate Geometry','Trigonometry','Mensuration'],mr:['समरूपता','पायथागोरसचे प्रमेय','वर्तुळ','भौमितिक रचना','निर्देशक भूमिती','त्रिकोणमिती','महत्वमापन']}
   }
 };
 
 const DEMO_TOPICS=['Superposition of Waves','Differentiation'];
-let cur='sp',selCls='xii',selStream='maths',lang='en',explainMode='simple',dark=true,fi=1;
-const FS=[[null,'Normal'],['fs-xl','XL'],['fs-xxl','XXL']];
-let tt,sP=0,sIv,sS=0,sTot=0,ri=0;
 
-const reps=[
-  "Good question! 🤔 Before I answer — what do you already know about this? Even a small idea helps me guide you better.",
-  "Let's think together. What happens when two waves travel in opposite directions on the same string?",
-  "Let me ask you first — what does 'superposition' mean in everyday language? Once you tell me, I'll connect it to physics.",
-  "You're on the right track! Try applying y = y₁ + y₂. What do you get when y₁ = y₂?",
-  "The key is: what is the PHASE DIFFERENCE between the two waves? Think about it! 🎯"
-];
-
-function go(id){if(id===cur)return;const c=document.getElementById(cur),n=document.getElementById(id);if(!c||!n)return;c.classList.remove('on');c.classList.add('out');setTimeout(()=>c.classList.remove('out'),240);n.classList.add('on');cur=id;const s=n.querySelector('.scroll');if(s)s.scrollTop=0;}
-function nav(id){go(id);}
-function pick(cls,el){selCls=cls;document.querySelectorAll('.ctile').forEach(t=>t.classList.remove('sel'));el.classList.add('sel');}
-function afterClass(){
-  if(selCls==='xi'||selCls==='xii'){document.getElementById('ss-class-lbl').textContent=selCls.toUpperCase();go('ss2');}
-  else{startApp();}
+// ══ NAVIGATION ══
+function go(id){
+  if(id===cur)return;
+  const c=document.getElementById(cur),n=document.getElementById(id);
+  if(!c||!n)return;
+  c.classList.remove('on');c.classList.add('out');
+  setTimeout(()=>c.classList.remove('out'),240);
+  n.classList.add('on');cur=id;
+  const s=n.querySelector('.scroll');if(s)s.scrollTop=0;
 }
-function pickStream(s,el){selStream=s;document.querySelectorAll('.stile').forEach(t=>t.classList.remove('sel'));el.classList.add('sel');document.getElementById('ss-maths').classList.toggle('on',s==='maths');document.getElementById('ss-bio').classList.toggle('on',s==='bio');document.getElementById('ss-stream-sub').textContent=s==='maths'?'Maths Stream':'Bio Stream';}
-function startApp(){buildLearnScreen();nav('hm');updateGreeting();setDailyQuote();}
+function nav(id){go(id);}
+
+// ══ CLASS/STREAM/GOAL SELECTION ══
+function pick(cls,el){
+  selCls=cls;
+  document.querySelectorAll('.ctile').forEach(t=>t.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function afterClass(){
+  if(selCls==='xi'||selCls==='xii'){
+    document.getElementById('ss-class-lbl').textContent=selCls.toUpperCase();
+    go('ss2');
+  } else {
+    examGoal='HSC Board';
+    startApp();
+  }
+}
+function pickStream(s,el){
+  selStream=s;
+  document.querySelectorAll('.stile').forEach(t=>t.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('ss-maths').classList.toggle('on',s==='maths');
+  document.getElementById('ss-bio').classList.toggle('on',s==='bio');
+  document.getElementById('ss-stream-sub').textContent=s==='maths'?'Maths Stream':'Bio Stream';
+}
+function afterStream(){
+  buildExamGoalScreen();
+  go('eg');
+}
+function buildExamGoalScreen(){
+  const goals=selStream==='bio'
+    ?['HSC Board','MHT-CET','NEET']
+    :['HSC Board','MHT-CET','JEE Mains','JEE Advanced'];
+  const icons={'HSC Board':'🎓','MHT-CET':'⚡','NEET':'🧬','JEE Mains':'🔬','JEE Advanced':'🏆'};
+  const descs={'HSC Board':'Balbharati textbook · Board pattern','MHT-CET':'Balbharati · MCQ focus','NEET':'NCERT primary · Biology/Phy/Chem MCQs','JEE Mains':'NCERT primary · Phy/Chem/Maths','JEE Advanced':'NCERT · Highest difficulty · IIT'};
+  let html='';
+  goals.forEach(g=>{
+    const key=g.replace(/ /g,'-');
+    html+=`<div class="eg-tile" id="eg-${key}" onclick="pickExamGoal('${g}')">
+      <div class="eg-ico">${icons[g]}</div>
+      <div style="flex:1">
+        <div class="eg-name">${g}</div>
+        <div class="eg-desc">${descs[g]}</div>
+      </div>
+      <div class="eg-check" id="eg-check-${key}">✓</div>
+    </div>`;
+  });
+  document.getElementById('eg-body').innerHTML=html;
+}
+function pickExamGoal(goal){
+  examGoal=goal;
+  document.querySelectorAll('.eg-tile').forEach(el=>el.classList.remove('sel'));
+  document.querySelectorAll('.eg-check').forEach(el=>el.style.display='none');
+  const key=goal.replace(/ /g,'-');
+  const tile=document.getElementById('eg-'+key);
+  if(tile)tile.classList.add('sel');
+  const check=document.getElementById('eg-check-'+key);
+  if(check)check.style.display='block';
+  setTimeout(()=>startApp(),350);
+}
+
+// ══ START APP ══
+function startApp(){
+  buildLearnScreen();
+  nav('hm');
+  updateGreeting();
+  setDailyQuote();
+  // Set student name everywhere
+  const firstName=STUDENT_NAME.split(' ')[0]||'Student';
+  const initial=firstName.charAt(0).toUpperCase();
+  document.getElementById('hm-name-display').textContent=STUDENT_NAME;
+  document.getElementById('hm-ava-display').textContent=initial;
+  document.getElementById('lb-my-name-display').textContent=STUDENT_LB+' — You ⭐';
+  document.getElementById('lb-entry-name').textContent=STUDENT_LB+' ⭐ You';
+  // Update welcome message
+  const wm=document.getElementById('welcome-msg');
+  if(wm) wm.innerHTML=`Namaste ${firstName}! 🙏<br>I help you <strong>think</strong> — not just give answers.<br><br><div class="fbr"><button class="fbb" onclick="quickQ('Superposition of waves?')">Superposition?</button><button class="fbb" onclick="quickQ('Explain differentiation')">Differentiation?</button><button class="fbb" onclick="quickQ('Chemical kinetics rate law')">Rate Law?</button></div>`;
+}
 
 function updateGreeting(){
   const h=new Date().getHours();
@@ -1143,9 +1223,7 @@ function setDailyQuote(){
   const day=new Date().getDay()+new Date().getDate();
   const q=QUOTES[day%QUOTES.length];
   const isMr=q.mr||false;
-  // Show Marathi quotes only for IX/X when Marathi toggle is on, or if it's a general quote
-  if(isMr&&lang==='en'&&(selCls==='xi'||selCls==='xii')){
-    // Skip Marathi quote for XI/XII in English mode
+  if(isMr&&(selCls==='xi'||selCls==='xii')){
     const fallback=QUOTES[(day+3)%QUOTES.length];
     document.getElementById('q-text').textContent=fallback.text;
     document.getElementById('q-attr').textContent=fallback.attr;
@@ -1157,12 +1235,12 @@ function setDailyQuote(){
   }
 }
 
+// ══ LEARN SCREEN ══
 function getSubjKey(){
   if(selCls==='xii') return selStream==='bio'?'xii-bio':'xii-maths';
   if(selCls==='xi') return selStream==='bio'?'xi-bio':'xi-maths';
   return selCls;
 }
-
 function buildLearnScreen(){
   const key=getSubjKey();
   const subs=SUBJECTS[key]||SUBJECTS['xii-maths'];
@@ -1179,27 +1257,23 @@ function buildLearnScreen(){
     </div>`;
   }
   html+='</div>';
-  // Show lang toggle only for IX/X
   if(isIXX){
     html+=`<div style="display:flex;justify-content:flex-end;padding:4px 20px 8px">
       <div class="lang-pill">
-        <div class="lp-opt ${lang==='en'?'on':''}" onclick="setLearnLang('en',this)">EN</div>
-        <div class="lp-opt mr-font ${lang==='mr'?'on':''}" onclick="setLearnLang('mr',this)">मराठी</div>
+        <div class="lp-opt ${lang==='en'?'on':''}" onclick="setLearnLang('en')">EN</div>
+        <div class="lp-opt mr-font ${lang==='mr'?'on':''}" onclick="setLearnLang('mr')">मराठी</div>
       </div>
     </div>`;
   }
   html+='<div style="height:12px"></div>';
   document.getElementById('sb-scroll').innerHTML=html;
 }
-
 function setLearnLang(l){
-  lang=l;
+  lang=l; wantsMarathi=(l==='mr');
   buildLearnScreen();
-  if(curSubj) buildTopicList(curSubj);
+  if(curSubj)buildTopicList(curSubj);
   xp(l==='mr'?'मराठी mode':'English mode');
 }
-
-let curSubj=null;
 function openSubj(subKey){
   const key=getSubjKey();
   const subs=SUBJECTS[key]||SUBJECTS['xii-maths'];
@@ -1215,7 +1289,6 @@ function openSubj(subKey){
   buildTopicList(s);
   go('tp');
 }
-
 function buildTopicList(s){
   const isIXX=(selCls==='ix'||selCls==='x');
   const useMr=isIXX&&lang==='mr'&&s.mr;
@@ -1224,6 +1297,14 @@ function buildTopicList(s){
     return;
   }
   let html='';
+  if(isIXX){
+    html+=`<div style="display:flex;justify-content:flex-end;padding:4px 0 8px">
+      <div class="lang-pill">
+        <div class="lp-opt ${lang==='en'?'on':''}" onclick="setLearnLang('en')">EN</div>
+        <div class="lp-opt mr-font ${lang==='mr'?'on':''}" onclick="setLearnLang('mr')">मराठी</div>
+      </div>
+    </div>`;
+  }
   s.chapters.forEach((ch,i)=>{
     const isDemo=DEMO_TOPICS.includes(ch);
     const badge=isDemo?`<div class="t-demo">✨ Demo</div>`:`<div class="t-cs">Coming Soon</div>`;
@@ -1234,29 +1315,15 @@ function buildTopicList(s){
       ${badge}
     </div>`;
   });
-  // Show lang toggle inside topic list for IX/X
-  if(isIXX){
-    const toggleHtml=`<div style="display:flex;justify-content:flex-end;padding:4px 0 8px">
-      <div class="lang-pill">
-        <div class="lp-opt ${lang==='en'?'on':''}" onclick="setLearnLang('en')">EN</div>
-        <div class="lp-opt mr-font ${lang==='mr'?'on':''}" onclick="setLearnLang('mr')">मराठी</div>
-      </div>
-    </div>`;
-    html=toggleHtml+html;
-  }
   document.getElementById('tpl').innerHTML=html;
 }
-
 function openTopic(name,subj,type){
   if(type==='demo'){
     document.getElementById('md-eye').textContent='⚡ '+subj.toUpperCase();
     document.getElementById('md-title').textContent=name;
     go('md');
-  } else {
-    showCS(name,subj);
-  }
+  } else {showCS(name,subj);}
 }
-
 function showCS(name,subj){
   document.getElementById('modal-title').textContent='Coming Soon — '+subj+'!';
   document.getElementById('modal-topic-name').textContent=name;
@@ -1266,6 +1333,7 @@ function closeModal(){document.getElementById('cs-modal').classList.remove('open
 function openStoryMode(){go('st');}
 function storyComplete(){xp('🎉 Theory Complete! +20 XP — Modes Unlocked!');setTimeout(()=>go('md'),1400);}
 
+// ══ STORY MODE ══
 function setExplainMode(m){
   explainMode=m;
   document.getElementById('se-simple').classList.toggle('on',m==='simple');
@@ -1274,25 +1342,26 @@ function setExplainMode(m){
   const rv=document.getElementById('cc-reveal');
   if(m==='exam'){
     rl.textContent='Reveal · Exam Mode';
-    rv.textContent='The Principle of Superposition states that when two or more waves overlap simultaneously, the resultant displacement at any point equals the algebraic sum of individual displacements of each wave at that point.';
+    rv.textContent='The Principle of Superposition states that when two or more waves overlap simultaneously, the resultant displacement equals the algebraic sum of individual displacements.';
     rv.classList.add('exam-mode');
   } else {
     rl.textContent='Reveal · Simple Mode';
-    rv.textContent='They ADD UP! If both waves push same direction — BIG wave. If opposite — they cancel. Like two people pushing a swing together or against each other.';
+    rv.textContent='They ADD UP! Same direction = BIG wave. Opposite = they cancel. Like two people pushing a swing together or against each other.';
     rv.classList.remove('exam-mode');
   }
   xp(m==='exam'?'🎓 Exam language mode':'👦 Simple language mode');
 }
 
-function setLbPeriod(p,el){document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');xp('Showing '+p+' leaderboard');}
-function setLbFilter(f,el){document.querySelectorAll('.lb-fil').forEach(t=>t.classList.remove('on'));el.classList.add('on');xp('Filter: '+f);}
+// ══ SETTINGS ══
 function openSettings(){document.getElementById('settings-sheet').classList.add('open');document.getElementById('ss-overlay').classList.add('open');}
 function closeSettings(){document.getElementById('settings-sheet').classList.remove('open');document.getElementById('ss-overlay').classList.remove('open');}
 function changeStream(s){pickStream(s,document.getElementById('str-'+s));buildLearnScreen();closeSettings();}
 function changeClassSetting(c){selCls=c;buildLearnScreen();closeSettings();xp('Class '+c.toUpperCase()+' set');}
-function saveParentWA(){const v=document.getElementById('parent-wa').value.trim();if(v){xp('✅ Parent WhatsApp saved! Reports will be sent every Sunday.');closeSettings();}else{xp('Please enter a valid number');}}
+function saveParentWA(){const v=document.getElementById('parent-wa').value.trim();if(v){xp('✅ Parent WhatsApp saved!');closeSettings();}else{xp('Please enter a valid number');}}
+function setLbPeriod(p,el){document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');xp('Showing '+p+' leaderboard');}
+function setLbFilter(f,el){document.querySelectorAll('.lb-fil').forEach(t=>t.classList.remove('on'));el.classList.add('on');xp('Filter: '+f);}
 
-const FS_KEYS=['fs-n',null,'fs-xxl'];
+// ══ FONT + THEME ══
 function cycleFont(){fi=(fi+1)%3;applyFont();}
 function setFont(idx){fi=idx;applyFont();}
 function applyFont(){
@@ -1315,27 +1384,234 @@ function applyTheme(){
   xp(dark?'🌙 Dark mode':'☀️ Light mode');
 }
 
-function quickQ(q){document.getElementById('ci').value=q;send();}
-function send(){const ci=document.getElementById('ci');const msg=ci.value.trim();if(!msg)return;const box=document.getElementById('msgs');box.innerHTML+=`<div class="msg me"><div class="mav">R</div><div><div class="mbub">${msg}</div><div class="mt">Now</div></div></div>`;ci.value='';box.scrollTop=box.scrollHeight;const aiDiv=document.createElement('div');aiDiv.className='msg ai';aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Vidya is thinking... 🤔</div></div>`;box.appendChild(aiDiv);box.scrollTop=box.scrollHeight;fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:msg,studentProfile:{studentClass:12,examGoal:'HSC Board',language:'English'},thumbsDownCount:0,conversationHistory:[]})}).then(r=>r.json()).then(data=>{aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${data.reply||data.error}</div><div class="mt">Now</div><div class="fbr"><button class="fbb" onclick="fbg(this)">👍 Got it!</button><button class="fbb" onclick="fbb2(this)">👎 Still confused</button></div></div>`;box.scrollTop=box.scrollHeight;xp('+1 XP');}).catch(()=>{aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Sorry, something went wrong. Please try again! 🙏</div></div>`;});
+// ══ CHAT TAB ══
+function switchTab(t){
+  document.getElementById('tab-doubt').classList.toggle('on',t==='doubt');
+  document.getElementById('tab-jig').classList.toggle('on',t==='jig');
+  document.getElementById('panel-doubt').style.display=t==='doubt'?'flex':'none';
+  document.getElementById('panel-jig').style.display=t==='jig'?'flex':'none';
 }
-// CHITTA
+function evalJig(){xp('💡 Jigyasa evaluation coming soon!');}
+function ck(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+
+// ══ FORMAT AI REPLY ══
+function formatReply(text){
+  // Escape HTML first to prevent injection
+  let h=text
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+
+  // PYQ badge
+  h=h.replace(/📋 PYQ[—\-–]?\s*([^\n]+)/g,'<div class="pyq-badge">📋 PYQ — $1</div>');
+
+  // Bold
+  h=h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+
+  // Section headers
+  h=h.replace(/📖 Definition\s*/g,'<div class="section-label" style="color:var(--e)">📖 Definition</div><div class="def-block">');
+  h=h.replace(/▔+/g,'</div>');
+
+  h=h.replace(/💡 Explanation\s*/g,'<div class="section-label" style="color:var(--amber)">💡 Explanation</div>');
+  h=h.replace(/❓ Quick Check\s*/g,'<div class="section-label" style="color:var(--pur)">❓ Quick Check</div>');
+  h=h.replace(/🎯 (.*?)(\n|$)/g,'<div class="section-label" style="color:var(--green)">🎯 $1</div>');
+
+  // Hint blocks
+  h=h.replace(/💡 Hint 1\s*/g,'<div class="hint-block"><div class="section-label" style="color:var(--amber)">💡 Hint 1</div>');
+  h=h.replace(/💡 Hint 2\s*/g,'</div><div class="hint-block"><div class="section-label" style="color:var(--amber)">💡 Hint 2</div>');
+  h=h.replace(/✅ Full Solution\s*/g,'</div><div class="sol-block"><div class="section-label" style="color:var(--green)">✅ Full Solution</div>');
+
+  // Option buttons
+  h=h.replace(/🔘 ([ABC])\. ([^\n]+)/g,'<button class="opt-btn" onclick="optionTap(this,\'$1\')">$1. $2</button>');
+
+  // Bullet points
+  h=h.replace(/^[•\-] (.+)$/gm,'<div class="exp-point">$1</div>');
+
+  // Action buttons (Want to know more, practice)
+  h=h.replace(/🔍 Want to know more\?[^\n]*/g,'<div class="fbr"><button class="action-btn" onclick="wantMore(this)">🔍 Want to know more?</button><button class="action-btn" onclick="wantNo(this)">No, I am good</button></div>');
+  h=h.replace(/📝 Want to practice[^\n]*/g,'<div class="fbr"><button class="action-btn" onclick="wantPractice(this)">📝 Yes, practice question</button><button class="action-btn" onclick="wantNo(this)">No thanks</button></div>');
+
+  // Line breaks
+  h=h.replace(/\n/g,'<br>');
+
+  return h;
+}
+
+// ══ OPTION TAP ══
+function optionTap(btn,option){
+  btn.closest('.mbub').querySelectorAll('.opt-btn').forEach(b=>{b.disabled=true;b.style.opacity='.5';});
+  btn.classList.add('selected');
+  btn.style.opacity='1';
+  setTimeout(()=>{
+    document.getElementById('ci').value='I selected option '+option;
+    send();
+  },300);
+}
+function wantMore(btn){
+  disableActionBtns(btn);
+  document.getElementById('ci').value='Yes, I want to know more about this';
+  setTimeout(()=>send(),300);
+}
+function wantPractice(btn){
+  disableActionBtns(btn);
+  document.getElementById('ci').value='Yes, give me a practice question';
+  setTimeout(()=>send(),300);
+}
+function wantNo(btn){
+  disableActionBtns(btn);
+  xp('Great! Come back anytime 🙏');
+}
+function disableActionBtns(btn){
+  const row=btn.closest('.fbr');
+  if(row)row.querySelectorAll('.action-btn').forEach(b=>{b.disabled=true;b.style.opacity='.4';});
+}
+
+// ══ THUMB FUNCTIONS ══
+function fbGood(btn){
+  thumbsDownCount=0;
+  btn.parentElement.innerHTML='<span style="font-size:.62rem;color:var(--green);font-weight:700">✓ Marked as helpful!</span>';
+  xp('✓ Helpful!');
+}
+function fbBad(btn){
+  thumbsDownCount++;
+  btn.parentElement.innerHTML='<span style="font-size:.62rem;color:var(--amber);font-weight:700">Trying a different approach...</span>';
+  xp(thumbsDownCount>=2?'Getting better explanation...':'Trying different approach...');
+}
+
+// ══ PHOTO UPLOAD ══
+function handlePhoto(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>4*1024*1024){xp('Photo is too large. Please use a smaller image.');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const base64=e.target.result.split(',')[1];
+    const mimeType=file.type||'image/jpeg';
+    const box=document.getElementById('msgs');
+    const initial=STUDENT_NAME.charAt(0).toUpperCase();
+    box.innerHTML+=`<div class="msg me"><div class="mav">${initial}</div><div><img src="${e.target.result}" style="max-width:190px;border-radius:10px;display:block;margin-bottom:3px"><div class="mt">Photo uploaded</div></div></div>`;
+    box.scrollTop=box.scrollHeight;
+    const aiDiv=document.createElement('div');
+    aiDiv.className='msg ai';
+    aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Reading your photo... 🤔</div></div>`;
+    box.appendChild(aiDiv);
+    box.scrollTop=box.scrollHeight;
+    conversationHistory.push({role:'user',content:'[Student uploaded a photo of a question]'});
+    fetch('/api/ask',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        question:'Please read this question from the photo carefully.',
+        imageBase64:base64,
+        imageMimeType:mimeType,
+        studentProfile:{
+          studentClass:selCls==='ix'?9:selCls==='x'?10:selCls==='xi'?11:12,
+          examGoal:examGoal,
+          studentName:STUDENT_NAME,
+        },
+        thumbsDownCount:thumbsDownCount,
+        conversationHistory:conversationHistory.slice(-6),
+        wantsMarathi:wantsMarathi,
+      })
+    })
+    .then(r=>r.json())
+    .then(data=>{
+      const reply=data.reply||data.error||'Something went wrong. Please try again.';
+      conversationHistory.push({role:'assistant',content:reply});
+      if(conversationHistory.length>20)conversationHistory=conversationHistory.slice(-20);
+      aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${formatReply(reply)}</div><div class="mt">Now</div><div class="fbr"><button class="fbb" onclick="fbGood(this)">👍 Got it!</button><button class="fbb" onclick="fbBad(this)">👎 Still confused</button></div></div>`;
+      box.scrollTop=box.scrollHeight;
+      xp('+1 XP');
+    })
+    .catch(()=>{
+      aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Could not read the photo. Please try again or type your question. 🙏</div></div>`;
+    });
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+
+// ══ SEND MESSAGE ══
+function quickQ(q){document.getElementById('ci').value=q;send();}
+function send(){
+  const ci=document.getElementById('ci');
+  const msg=ci.value.trim();
+  if(!msg)return;
+  const box=document.getElementById('msgs');
+  const initial=STUDENT_NAME.charAt(0).toUpperCase();
+  box.innerHTML+=`<div class="msg me"><div class="mav">${initial}</div><div><div class="mbub">${msg}</div><div class="mt">Now</div></div></div>`;
+  ci.value='';
+  box.scrollTop=box.scrollHeight;
+  conversationHistory.push({role:'user',content:msg});
+  const aiDiv=document.createElement('div');
+  aiDiv.className='msg ai';
+  aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Vidya is thinking... 🤔</div></div>`;
+  box.appendChild(aiDiv);
+  box.scrollTop=box.scrollHeight;
+  fetch('/api/ask',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      question:msg,
+      studentProfile:{
+        studentClass:selCls==='ix'?9:selCls==='x'?10:selCls==='xi'?11:12,
+        examGoal:examGoal,
+        studentName:STUDENT_NAME,
+      },
+      thumbsDownCount:thumbsDownCount,
+      conversationHistory:conversationHistory.slice(-6),
+      wantsMarathi:wantsMarathi,
+    })
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    const reply=data.reply||data.error||'Something went wrong. Please try again.';
+    conversationHistory.push({role:'assistant',content:reply});
+    if(conversationHistory.length>20)conversationHistory=conversationHistory.slice(-20);
+    aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${formatReply(reply)}</div><div class="mt">Now</div><div class="fbr"><button class="fbb" onclick="fbGood(this)">👍 Got it!</button><button class="fbb" onclick="fbBad(this)">👎 Still confused</button></div></div>`;
+    box.scrollTop=box.scrollHeight;
+    xp('+1 XP');
+  })
+  .catch(()=>{
+    aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Something went wrong. Please check your internet and try again. 🙏</div></div>`;
+  });
+}
+
+// ══ CHITTA ══
 const PH=[
   {label:'Phase 1 of 5',title:'🌬️ Breathe',dur:180,html:`<div class="sess-card"><span class="sess-card-ico">😮</span><div class="sess-card-title">4-7-8 Breathing</div><div class="sess-card-body">Follow the rhythm. Do 3 cycles.</div><div class="breath-steps"><div class="bstep"><div class="bstep-n">4</div><div class="bstep-l">Breathe IN</div></div><div class="bstep"><div class="bstep-n">7</div><div class="bstep-l">HOLD</div></div><div class="bstep"><div class="bstep-n">8</div><div class="bstep-l">Breathe OUT</div></div></div><div class="sess-sci">🔬 8-count exhale activates parasympathetic nervous system. Cortisol drops. Brain switches to learning mode.</div></div><button class="sess-next" onclick="nextPhase()">Done Breathing → Next</button>`},
-  {label:'Phase 2 of 5',title:'🧘 Move',dur:240,html:`<div class="sess-card"><span class="sess-card-ico">🌳</span><div class="sess-card-title">Vrikshasana — Tree Pose</div><div class="sess-card-body">Stand straight. Right foot on left inner thigh. Arms overhead. Hold 30 sec. Switch sides. Focus on one fixed point.</div><div class="sess-sci">🔬 Balance exercises activate cerebellum and prefrontal cortex. Blood flow to brain increases 14%.</div></div><button class="sess-next" onclick="nextPhase()">Done Moving → Next</button>`},
+  {label:'Phase 2 of 5',title:'🧘 Move',dur:240,html:`<div class="sess-card"><span class="sess-card-ico">🌳</span><div class="sess-card-title">Vrikshasana — Tree Pose</div><div class="sess-card-body">Stand straight. Right foot on left inner thigh. Arms overhead. Hold 30 sec. Switch sides.</div><div class="sess-sci">🔬 Balance exercises activate cerebellum and prefrontal cortex. Blood flow to brain increases 14%.</div></div><button class="sess-next" onclick="nextPhase()">Done Moving → Next</button>`},
   {label:'Phase 3 of 5',title:'🧠 Fuel Check',dur:180,html:`<div class="sess-card"><span class="sess-card-ico">🍽️</span><div class="sess-card-title">What did you eat last 2 hours?</div><div class="sess-card-body" style="text-align:left"><div class="fuel-choice" onclick="fp(this,'good')">🥜 Almonds / Banana / Fruits</div><div class="fuel-choice" onclick="fp(this,'ok')">🍚 Rice / Roti / Dal</div><div class="fuel-choice" onclick="fp(this,'bad')">🍔 Biscuits / Chips / Sweet chai</div><div class="fuel-choice" onclick="fp(this,'water')">💧 Nothing / Just water</div><div id="fuel-fb" style="margin-top:8px;font-size:.72rem;display:none"></div></div></div><button class="sess-next" onclick="nextPhase()">Next →</button>`},
   {label:'Phase 4 of 5',title:'🎯 Set Intention',dur:180,html:`<div class="sess-card"><span class="sess-card-ico">✍️</span><div class="sess-card-title">What will you focus on today?</div><div class="sess-card-body">Be specific — not "study Physics" but "understand Superposition and solve 3 problems".</div><textarea class="intent-input" placeholder="Today I will understand..."></textarea><div class="sess-sci">🔬 Writing a specific intention increases follow-through by 40%.</div></div><button class="sess-next" onclick="nextPhase()">Intention Set → Final Phase</button>`},
   {label:'Phase 5 of 5',title:'⚡ Ready!',dur:120,html:`<div class="complete-wrap"><span class="complete-ico">🎉</span><div class="complete-title">Your Mind is Ready!</div><div class="complete-sub">Your first study hour will be 34% more effective right now.</div><div class="complete-reward"><div class="complete-rew-lbl">🎁 REWARD UNLOCKED</div><div class="complete-rew-val">+2 Extra Doubts ⚡ +10 XP</div></div><button class="complete-back" onclick="finishSess()">Start Studying Now →</button></div>`}
 ];
 function startSess(){sP=0;go('ct-s');loadPhase(0);}
-function loadPhase(i){const p=PH[i];document.getElementById('s-plbl').textContent=p.label;document.getElementById('s-title').textContent=p.title;document.getElementById('s-body').innerHTML=p.html;for(let j=0;j<5;j++){const el=document.getElementById('sph'+(j+1));el.className='sph'+(j<i?' done':j===i?' active':'');}clearInterval(sIv);sTot=p.dur;sS=p.dur;updST();sIv=setInterval(()=>{sS--;updST();if(sS<=0)clearInterval(sIv);},1000);}
-function updST(){document.getElementById('s-timer').textContent=String(Math.floor(sS/60)).padStart(2,'0')+':'+String(sS%60).padStart(2,'0');document.getElementById('s-tfill').style.width=((sTot-sS)/sTot*100)+'%';}
+function loadPhase(i){
+  const p=PH[i];
+  document.getElementById('s-plbl').textContent=p.label;
+  document.getElementById('s-title').textContent=p.title;
+  document.getElementById('s-body').innerHTML=p.html;
+  for(let j=0;j<5;j++){const el=document.getElementById('sph'+(j+1));el.className='sph'+(j<i?' done':j===i?' active':'');}
+  clearInterval(sIv);sTot=p.dur;sS=p.dur;updST();
+  sIv=setInterval(()=>{sS--;updST();if(sS<=0)clearInterval(sIv);},1000);
+}
+function updST(){
+  document.getElementById('s-timer').textContent=String(Math.floor(sS/60)).padStart(2,'0')+':'+String(sS%60).padStart(2,'0');
+  document.getElementById('s-tfill').style.width=((sTot-sS)/sTot*100)+'%';
+}
 function nextPhase(){clearInterval(sIv);sP=Math.min(sP+1,PH.length-1);loadPhase(sP);}
 function finishSess(){clearInterval(sIv);xp('🧘 +2 Doubts + 10 XP Unlocked!');nav('hm');}
-function fp(el,type){document.querySelectorAll('.fuel-choice').forEach(e=>{e.style.borderColor='var(--b)';e.style.background='var(--bg3)';});const fb=document.getElementById('fuel-fb');fb.style.display='block';const M={good:['var(--green)','✅ Perfect fuel! Brain is ready.'],ok:['var(--e)','👍 Good. Drink water before starting.'],bad:['var(--amber)','⚠️ Sugar crash in ~45 min. Have 5 almonds!'],water:['var(--pur)','💧 Drink water now! Dehydration reduces focus.']};const[col,msg]=M[type];fb.style.color=col;fb.textContent=msg;el.style.borderColor=col;el.style.background='rgba(0,0,0,.08)';}
+function fp(el,type){
+  document.querySelectorAll('.fuel-choice').forEach(e=>{e.style.borderColor='var(--b)';e.style.background='var(--bg3)';});
+  const fb=document.getElementById('fuel-fb');fb.style.display='block';
+  const M={good:['var(--green)','✅ Perfect fuel! Brain is ready.'],ok:['var(--e)','👍 Good. Drink water before starting.'],bad:['var(--amber)','⚠️ Sugar crash in ~45 min. Have 5 almonds!'],water:['var(--pur)','💧 Drink water now! Dehydration reduces focus.']};
+  const[col,msg]=M[type];fb.style.color=col;fb.textContent=msg;el.style.borderColor=col;el.style.background='rgba(0,0,0,.08)';
+}
 
+// ══ TOAST ══
 function xp(msg){const t=document.getElementById('toast');clearTimeout(tt);t.textContent=msg;t.classList.add('pop');tt=setTimeout(()=>t.classList.remove('pop'),2200);}
 
-// INIT
+// ══ INIT ══
 setTimeout(()=>{buildLearnScreen();nav('cs');updateGreeting();setDailyQuote();},2000);
 </script>
 </body>
