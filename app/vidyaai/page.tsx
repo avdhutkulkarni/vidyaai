@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
@@ -7,20 +7,23 @@ import { auth } from '@/lib/firebase'
 export default function VidyaAI() {
   const router = useRouter()
   const [src, setSrc] = useState<string | null>(null)
+  const srcSetRef = useRef(false)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         router.push('/')
-      } else {
-        try {
-          const token = await user.getIdToken()
-          const name = encodeURIComponent(user.displayName || 'Student')
-          const cls = encodeURIComponent((user as any).studentClass || '12')
-          setSrc(`/app.html?token=${token}&name=${name}&cls=${cls}`)
-        } catch {
-          router.push('/')
-        }
+        return
+      }
+      // Only set src ONCE — prevents multiple iframe reloads
+      if (srcSetRef.current) return
+      srcSetRef.current = true
+      try {
+        const token = await user.getIdToken(true) // force refresh
+        const name = encodeURIComponent(user.displayName || 'Student')
+        setSrc(`/app.html?token=${token}&name=${name}`)
+      } catch {
+        router.push('/')
       }
     })
     return () => unsub()

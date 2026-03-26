@@ -335,7 +335,7 @@ body:not(.day) .modal-topic{background:rgba(0,212,255,.07);border-color:rgba(0,2
 .lb-streak-pill{font-size:.58rem;font-weight:700;color:var(--amber)}
 #ch{background:var(--bg)}
 .ch-hdr{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 16px 0;background:var(--bg2);border-bottom:1px solid var(--b2);transition:all .3s}
-.ch-hdr.hidden{height:0;padding:0;overflow:hidden;border:none}
+.ch-hdr.hidden{height:0;padding:0;overflow:hidden;border:none;min-height:0;pointer-events:none}
 .ch-hdr-top{display:flex;align-items:center;gap:8px;padding-bottom:10px}
 .ch-ava{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--e),var(--pur));display:flex;align-items:center;justify-content:center;font-size:1rem}
 .ch-inf h2{font-size:.84rem;font-weight:800}.ch-inf p{font-size:.58rem;color:var(--t2);font-weight:600}
@@ -1623,7 +1623,7 @@ function handlePhoto(input){
   const file=input.files[0]
   if(!file)return
   document.getElementById('ch-hdr').classList.add('hidden')
-  if(file.size>4*1024*1024){xp('Photo is too large. Please use a smaller image.');input.value='';return}
+  if(file.size>4*1024*1024){xp('Photo is too large. Please use a smaller image.');setTimeout(()=>{input.value=''},300);return}
   const reader=new FileReader()
   reader.onload=function(e){
     const base64=e.target.result.split(',')[1]
@@ -1681,7 +1681,7 @@ function handlePhoto(input){
     })
   }
   reader.readAsDataURL(file)
-  input.value=''
+  setTimeout(()=>{input.value=''},300)
 }
 
 // ══ SEND MESSAGE ══
