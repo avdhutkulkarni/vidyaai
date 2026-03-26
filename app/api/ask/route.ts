@@ -1,7 +1,26 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { adminAuth, adminDb } from '@/lib/firebaseAdmin'
+import { checkAndIncrement } from '@/lib/doubtLimit'
+import { getSyllabusVersion } from '@/lib/syllabusVersion'
+import {
+  hashText,
+  hashImage,
+  detectCacheableType,
+  checkCache,
+  checkPhotoCache,
+  saveToCache,
+  savePhotoToCache
+} from '@/lib/cache'
+import { saveDoubtHistory } from '@/lib/doubtHistory'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+const TOKEN_BUDGET = 4000
+
+// ─────────────────────────────────────────
+// SYSTEM PROMPT
+// ─────────────────────────────────────────
 
 function getTextbook(examGoal: string): string {
   if (['NEET', 'JEE Mains', 'JEE Advanced'].includes(examGoal)) {
@@ -29,7 +48,13 @@ function getLanguageInstruction(studentClass: number, wantsMarathi: boolean): st
 - Example: "उत्कर्ष (Superposition)" or "बल (Force)"`
 }
 
-function buildSystemPrompt(studentClass: number, examGoal: string, studentName: string, wantsMarathi: boolean, thumbsDownCount: number): string {
+function buildSystemPrompt(
+  studentClass: number,
+  examGoal: string,
+  studentName: string,
+  wantsMarathi: boolean,
+  thumbsDownCount: number
+): string {
   const isJunior = studentClass === 9 || studentClass === 10
   const textbook = getTextbook(examGoal)
   const langInstruction = getLanguageInstruction(studentClass, wantsMarathi)
@@ -43,6 +68,19 @@ Textbook reference: ${textbook}
 LANGUAGE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${langInstruction}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONCEPT DETECTION — IMPORTANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+After every response include this metadata block at the very end:
+[META]
+concept: <concept name>
+subject: <subject name>
+chapter: <chapter name if known>
+confidence: <HIGH or MEDIUM or LOW>
+cacheable: <YES or NO>
+newConcept: <YES or NO — is this a different concept from previous message?>
+[/META]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PRESENTATION RULES — ALWAYS
@@ -240,36 +278,241 @@ You are ${firstName}'s 24/7 study partner.
 Every interaction should leave ${firstName} feeling more confident. 🙏`
 }
 
+// ─────────────────────────────────────────
+// PARSE META FROM AI RESPONSE
+// ─────────────────────────────────────────
+
+function parseMeta(rawReply: string): {
+  cleanReply: string
+  concept: string
+  subject: string
+  chapter: string
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW'
+  cacheable: boolean
+  newConcept: boolean
+} {
+  const metaMatch = rawReply.match(/\[META\]([\s\S]*?)\[\/META\]/)
+
+  const defaults = {
+    cleanReply: rawReply,
+    concept: 'General',
+    subject: 'General',
+    chapter: '',
+    confidence: 'MEDIUM' as const,
+    cacheable: false,
+    newConcept: false
+  }
+
+  if (!metaMatch) return defaults
+
+  const metaBlock = metaMatch[1]
+  const cleanReply = rawReply.replace(/\[META\][\s\S]*?\[\/META\]/, '').trim()
+
+  const get = (key: string): string => {
+    const match = metaBlock.match(new RegExp(`${key}:\\s*(.+)`))
+    return match ? match[1].trim() : ''
+  }
+
+  return {
+    cleanReply,
+    concept: get('concept') || 'General',
+    subject: get('subject') || 'General',
+    chapter: get('chapter') || '',
+    confidence: (get('confidence') as 'HIGH' | 'MEDIUM' | 'LOW') || 'MEDIUM',
+    cacheable: get('cacheable') === 'YES',
+    newConcept: get('newConcept') === 'YES'
+  }
+}
+
+// ─────────────────────────────────────────
+// TRIM CONVERSATION TO TOKEN BUDGET
+// ─────────────────────────────────────────
+
+function trimHistory(
+  history: Array<{ role: 'user' | 'assistant'; content: string }>,
+  budget: number
+): Array<{ role: 'user' | 'assistant'; content: string }> {
+  let total = 0
+  const trimmed = []
+
+  for (let i = history.length - 1; i >= 0; i--) {
+    const tokens = Math.ceil(history[i].content.length / 4)
+    if (total + tokens > budget) break
+    total += tokens
+    trimmed.unshift(history[i])
+  }
+
+  return trimmed
+}
+
+// ─────────────────────────────────────────
+// MAIN POST HANDLER
+// ─────────────────────────────────────────
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { question, studentProfile, thumbsDownCount = 0, conversationHistory = [], wantsMarathi = false, imageBase64, imageMimeType } = body
+    const {
+      question,
+      studentProfile,
+      thumbsDownCount = 0,
+      conversationHistory = [],
+      wantsMarathi = false,
+      imageBase64,
+      imageMimeType
+    } = body
 
-    if (!imageBase64 && (!question || typeof question !== 'string' || question.trim().length === 0)) {
-      return NextResponse.json({ error: 'Please type your question.' }, { status: 400 })
+    // ── 1. VERIFY FIREBASE TOKEN ──
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Please login again.' },
+        { status: 401 }
+      )
     }
 
+    const idToken = authHeader.split('Bearer ')[1]
+    let verifiedUid: string
+
+    try {
+      const decoded = await adminAuth.verifyIdToken(idToken)
+      verifiedUid = decoded.uid
+    } catch {
+      return NextResponse.json(
+        { error: 'Session expired. Please login again.' },
+        { status: 401 }
+      )
+    }
+
+    // ── 2. VALIDATE REQUEST ──
+    if (!imageBase64 && (!question || typeof question !== 'string' || question.trim().length === 0)) {
+      return NextResponse.json(
+        { error: 'Please type your question.' },
+        { status: 400 }
+      )
+    }
+
+    // ── 3. IMAGE SIZE CHECK ──
+    if (imageBase64) {
+      const sizeInMB = (imageBase64.length * 0.75) / (1024 * 1024)
+      if (sizeInMB > 5) {
+        return NextResponse.json(
+          { error: 'Image too large. Please use an image under 5MB.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // ── 4. STUDENT PROFILE ──
     const studentClass: number = studentProfile?.studentClass ?? 12
     const examGoal: string = studentProfile?.examGoal ?? 'HSC Board'
     const studentName: string = studentProfile?.studentName ?? 'Student'
 
-    const systemPrompt = buildSystemPrompt(studentClass, examGoal, studentName, wantsMarathi, thumbsDownCount)
-    const model = thumbsDownCount >= 2 ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001'
-    const messages: Array<{ role: 'user' | 'assistant'; content: any }> = []
+    // ── 5. DOUBT LIMIT CHECK ──
+    const limitResult = await checkAndIncrement(verifiedUid, studentClass)
 
-    const recentHistory = conversationHistory.slice(-6)
-    for (const msg of recentHistory) {
-      if (msg.role === 'user' || msg.role === 'assistant') {
-        messages.push({ role: msg.role, content: msg.content })
+    if (!limitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: limitResult.limitMessage,
+          code: 'LIMIT_REACHED',
+          used: limitResult.used,
+          limit: limitResult.limit
+        },
+        { status: 429 }
+      )
+    }
+
+    // ── 6. GET SYLLABUS VERSION ──
+    const syllabusVersion = await getSyllabusVersion(studentClass)
+
+    // ── 7. CHECK CACHE ──
+    let cacheHit = false
+    let cachedAnswer: string | null = null
+
+    if (imageBase64) {
+      const imageHash = hashImage(imageBase64)
+      const photoCache = await checkPhotoCache({
+        imageHash,
+        syllabusVersion,
+        thumbsDownCount
+      })
+
+      if (photoCache.hit && photoCache.answer) {
+        cacheHit = true
+        cachedAnswer = photoCache.answer
+      }
+    } else {
+      const { cacheable, type } = detectCacheableType(question)
+
+      if (cacheable) {
+        const questionHash = hashText(question)
+        const textCache = await checkCache({
+          questionHash,
+          studentClass,
+          subject: studentProfile?.subject || 'general',
+          type,
+          syllabusVersion,
+          thumbsDownCount
+        })
+
+        if (textCache.hit && textCache.answer) {
+          cacheHit = true
+          cachedAnswer = textCache.answer
+        }
       }
     }
+
+    // Return cached answer if found
+    if (cacheHit && cachedAnswer) {
+      return NextResponse.json({
+        reply: cachedAnswer,
+        model: 'cache',
+        used: limitResult.used,
+        limit: limitResult.limit,
+        warning: limitResult.warning,
+        warningMessage: limitResult.warningMessage,
+        fromCache: true
+      })
+    }
+
+    // ── 8. CALL CLAUDE API ──
+    const model = thumbsDownCount >= 2
+      ? 'claude-sonnet-4-6'
+      : 'claude-haiku-4-5-20251001'
+
+    const systemPrompt = buildSystemPrompt(
+      studentClass, examGoal, studentName, wantsMarathi, thumbsDownCount
+    )
+
+    // Trim history to token budget
+    const trimmedHistory = trimHistory(
+      conversationHistory.filter((m: any) =>
+        m.role === 'user' || m.role === 'assistant'
+      ),
+      TOKEN_BUDGET
+    )
+
+    const messages: Array<{ role: 'user' | 'assistant'; content: any }> = [
+      ...trimmedHistory
+    ]
 
     if (imageBase64) {
       messages.push({
         role: 'user',
         content: [
-          { type: 'image', source: { type: 'base64', media_type: imageMimeType || 'image/jpeg', data: imageBase64 } },
-          { type: 'text', text: 'Please read this question from the photo. If it is a PYQ add the badge with exam name and year. Then help me understand it step by step.' }
+          {
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: imageMimeType || 'image/jpeg',
+              data: imageBase64
+            }
+          },
+          {
+            type: 'text',
+            text: 'Please read this question from the photo. If it is a PYQ add the badge with exam name and year. Then help me understand it step by step.'
+          }
         ]
       })
     } else {
@@ -280,18 +523,91 @@ export async function POST(req: NextRequest) {
       model,
       max_tokens: 1200,
       system: systemPrompt,
-      messages,
+      messages
     })
 
-    const reply = response.content
+    const rawReply = response.content
       .filter((b) => b.type === 'text')
       .map((b) => (b as { type: 'text'; text: string }).text)
       .join('')
 
-    return NextResponse.json({ reply, model: thumbsDownCount >= 2 ? 'sonnet' : 'haiku' })
+    // ── 9. PARSE META ──
+    const {
+      cleanReply,
+      concept,
+      subject,
+      chapter,
+      confidence,
+      cacheable: isCacheable,
+      newConcept
+    } = parseMeta(rawReply)
+
+    // ── 10. SAVE TO CACHE ──
+    if (isCacheable && confidence === 'HIGH') {
+      if (imageBase64) {
+        const imageHash = hashImage(imageBase64)
+        savePhotoToCache({
+          imageHash,
+          extractedQuestion: question || 'Photo question',
+          answer: cleanReply,
+          modelUsed: thumbsDownCount >= 2 ? 'sonnet' : 'haiku',
+          studentClass,
+          subject,
+          syllabusVersion,
+          confidence,
+          thumbsDownCount
+        }).catch(err => console.error('savePhotoToCache error:', err))
+      } else {
+        const { type } = detectCacheableType(question)
+        const questionHash = hashText(question)
+        saveToCache({
+          questionHash,
+          question,
+          answer: cleanReply,
+          modelUsed: thumbsDownCount >= 2 ? 'sonnet' : 'haiku',
+          studentClass,
+          subject,
+          type,
+          syllabusVersion,
+          confidence,
+          thumbsDownCount
+        }).catch(err => console.error('saveToCache error:', err))
+      }
+    }
+
+    // ── 11. SAVE DOUBT HISTORY ──
+    saveDoubtHistory({
+      uid: verifiedUid,
+      question: imageBase64 ? 'Photo question' : question,
+      questionType: imageBase64 ? 'photo' : 'text',
+      stepwiseAnswer: cleanReply,
+      subject,
+      concept,
+      chapter,
+      studentClass,
+      resolved: false,
+      modelUsed: thumbsDownCount >= 2 ? 'sonnet' : 'haiku'
+    }).catch(err => console.error('saveDoubtHistory error:', err))
+
+    // ── 12. RETURN RESPONSE ──
+    return NextResponse.json({
+      reply: cleanReply,
+      model: thumbsDownCount >= 2 ? 'sonnet' : 'haiku',
+      used: limitResult.used,
+      limit: limitResult.limit,
+      warning: limitResult.warning,
+      warningMessage: limitResult.warningMessage,
+      newConcept,
+      concept,
+      subject,
+      fromCache: false
+    })
 
   } catch (err: unknown) {
     console.error('VidyaAI API error:', err)
-    return NextResponse.json({ error: 'Something went wrong. Please try again. 🙏' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Something went wrong. Please try again. 🙏' },
+      { status: 500 }
+    )
   }
 }
