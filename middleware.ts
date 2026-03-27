@@ -16,9 +16,9 @@ export function middleware(request: NextRequest) {
   }
 
   // Block /vidyaai without auth cookie
-  if (pathname.startsWith('/vidyaai')) {
+  if (pathname.startsWith('/vidyaai') && pathname !== '/vidyaai-login') {
     const token = request.cookies.get('vidyaai-auth')
-    if (!token) return NextResponse.redirect(new URL('/', request.url))
+    if (!token) return NextResponse.redirect(new URL('/vidyaai-login', request.url))
   }
 
   // /admin handles its own Firebase auth — no cookie check needed here

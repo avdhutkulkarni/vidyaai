@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signOut, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { signOut, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 
 async function checkApproval(token: string): Promise<boolean> {
@@ -29,16 +29,29 @@ function HomeContent() {
       return
     }
 
+    const signInAndGo = async (token: string) => {
+      const approved = await checkApproval(token)
+      if (approved) {
+        document.cookie = `vidyaai-auth=${token}; path=/; max-age=3600; SameSite=Lax`
+        router.push('/vidyaai')
+      } else {
+        await signOut(auth)
+        setShowPending(true)
+      }
+    }
+
+    // Handle redirect result (mobile sign-in from landing page)
+    getRedirectResult(auth).then(async (result) => {
+      if (result?.user) {
+        const token = await result.user.getIdToken()
+        await signInAndGo(token)
+      }
+    }).catch(() => {})
+
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const token = await user.getIdToken()
-        const approved = await checkApproval(token)
-        if (approved) {
-          router.push('/vidyaai')
-        } else {
-          await signOut(auth)
-          setShowPending(true)
-        }
+        await signInAndGo(token)
       }
     })
 
@@ -51,14 +64,13 @@ function HomeContent() {
           e.preventDefault()
           try {
             const provider = new GoogleAuthProvider()
-            const result = await signInWithPopup(auth, provider)
-            const token = await result.user.getIdToken()
-            const approved = await checkApproval(token)
-            if (approved) {
-              router.push('/vidyaai')
+            const mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
+            if (mobile) {
+              await signInWithRedirect(auth, provider)
             } else {
-              await signOut(auth)
-              setShowPending(true)
+              const result = await signInWithPopup(auth, provider)
+              const token = await result.user.getIdToken()
+              await signInAndGo(token)
             }
           } catch {}
         })
