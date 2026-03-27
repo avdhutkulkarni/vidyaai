@@ -21,13 +21,9 @@ export function middleware(request: NextRequest) {
     if (!token) return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Block /admin without auth cookie
-  if (pathname.startsWith('/admin')) {
-    const token = request.cookies.get('vidyaai-auth')
-    if (!token) return NextResponse.redirect(new URL('/vidyaai-login', request.url))
-  }
+  // /admin handles its own Firebase auth — no cookie check needed here
 
-  return NextResponse.next()
+return NextResponse.next()
 }
 
 export const config = {
