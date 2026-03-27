@@ -10,23 +10,28 @@ export default function VidyaAI() {
   const srcSetRef = useRef(false)
 
   useEffect(() => {
+    // Give Firebase time to restore auth state from storage before redirecting
+    let redirectTimer: ReturnType<typeof setTimeout> | null = null
+
     const unsub = onAuthStateChanged(auth, async (user) => {
+      if (redirectTimer) { clearTimeout(redirectTimer); redirectTimer = null }
+
       if (!user) {
-        router.push('/')
+        // Wait 2s — on mobile Firebase may need time to restore session
+        redirectTimer = setTimeout(() => router.push('/vidyaai-login'), 2000)
         return
       }
-      // Only set src ONCE — prevents multiple iframe reloads
       if (srcSetRef.current) return
       srcSetRef.current = true
       try {
-        const token = await user.getIdToken(true) // force refresh
+        const token = await user.getIdToken(true)
         const name = encodeURIComponent(user.displayName || 'Student')
         setSrc(`/app.html?token=${token}&name=${name}`)
       } catch {
-        router.push('/')
+        router.push('/vidyaai-login')
       }
     })
-    return () => unsub()
+    return () => { unsub(); if (redirectTimer) clearTimeout(redirectTimer) }
   }, [router])
 
   if (!src) return (
