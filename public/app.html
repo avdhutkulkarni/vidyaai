@@ -334,7 +334,7 @@ body:not(.day) .modal-topic{background:rgba(0,212,255,.07);border-color:rgba(0,2
 .lb-exppill{font-size:.66rem;font-weight:800;color:var(--e)}
 .lb-streak-pill{font-size:.58rem;font-weight:700;color:var(--amber)}
 #ch{background:var(--bg)}
-.ch-hdr{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 44px) 16px 0;background:var(--bg2);border-bottom:1px solid var(--b2);transition:all .3s}
+.ch-hdr{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 0;background:var(--bg2);border-bottom:1px solid var(--b2);transition:all .3s}
 .ch-hdr.hidden{height:0;padding:0;overflow:hidden;border:none;min-height:0;pointer-events:none}
 .ch-hdr-top{display:flex;align-items:center;gap:8px;padding-bottom:10px}
 .ch-ava{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--e),var(--pur));display:flex;align-items:center;justify-content:center;font-size:1rem}
@@ -954,13 +954,13 @@ body.day .ct-land{background:linear-gradient(160deg,#E8F4F0,#EEF3F8,var(--bg))}
     </div>
     <div class="cinw">
       <div class="cinr">
-        <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)">
-        <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)">
+        <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this);hidePhotoMenu()">
+        <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this);hidePhotoMenu()">
         <div class="phb" onclick="showPhotoMenu()" title="Upload photo">📷</div>
         <div id="photo-menu" style="display:none;position:absolute;bottom:60px;left:12px;background:var(--card2);border:1px solid var(--b2);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:100">
-          <div onclick="document.getElementById('photo-input').click();hidePhotoMenu()" style="padding:12px 20px;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--t1)">📷 Choose from Gallery</div>
+          <label for="photo-input" style="padding:12px 20px;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--t1)">📷 Choose from Gallery</label>
           <div style="height:1px;background:var(--b)"></div>
-          <div onclick="document.getElementById('camera-input').click();hidePhotoMenu()" style="padding:12px 20px;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--t1)">📸 Take Photo</div>
+          <label for="camera-input" style="padding:12px 20px;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--t1)">📸 Take Photo</label>
         </div>
         <textarea class="cin" id="ci" placeholder="Type your doubt..." rows="1" onkeydown="ck(event)"></textarea>
         <div id="lang-toggle-btn" class="phb" onclick="toggleMarathi()" title="Toggle Marathi/English" style="font-size:.65rem;font-weight:700;letter-spacing:-.3px">EN</div>
@@ -1649,63 +1649,74 @@ function fbBad(btn){
 function handlePhoto(input){
   const file=input.files[0]
   if(!file)return
-  document.getElementById('ch-hdr').classList.add('hidden')
+  const hdr=document.getElementById('ch-hdr')
+  if(hdr)hdr.classList.add('hidden')
   if(file.size>4*1024*1024){xp('Photo is too large. Please use a smaller image.');setTimeout(()=>{input.value=''},300);return}
   const reader=new FileReader()
+  reader.onerror=function(){xp('Could not read the photo file. Please try again. 🙏')}
   reader.onload=function(e){
-    const base64=e.target.result.split(',')[1]
-    const mimeType=file.type||'image/jpeg'
-    const box=document.getElementById('msgs')
-    const initial=STUDENT_NAME.charAt(0).toUpperCase()
-    box.innerHTML+=`<div class="msg me"><div class="mav">${initial}</div><div><img src="${e.target.result}" style="max-width:190px;border-radius:10px;display:block;margin-bottom:3px"><div class="mt">Photo uploaded</div></div></div>`
-    box.scrollTop=box.scrollHeight
-    const aiDiv=document.createElement('div')
-    aiDiv.className='msg ai'
-    aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Reading your photo... 🤔</div></div>`
-    box.appendChild(aiDiv)
-    box.scrollTop=box.scrollHeight
-    conversationHistory.push({role:'user',content:'[Student uploaded a photo of a question]'})
-    fetch('/api/ask',{
-      method:'POST',
-      headers:getHeaders(),
-      body:JSON.stringify({
-        question:'Please read this question from the photo carefully.',
-        imageBase64:base64,
-        imageMimeType:mimeType,
-        studentProfile:{studentClass:getStudentClass(),examGoal,studentName:STUDENT_NAME},
-        thumbsDownCount,
-        conversationHistory:conversationHistory.slice(-6),
-        wantsMarathi
-      })
-    })
-    .then(r=>{
-      if(r.status===429)return r.json().then(d=>{throw{limitReached:true,message:d.error}})
-      return r.json()
-    })
-    .then(data=>{
-      const reply=data.reply||data.error||'Something went wrong.'
-      conversationHistory.push({role:'assistant',content:reply})
-      if(conversationHistory.length>20)conversationHistory=conversationHistory.slice(-20)
-      if(data.used!==undefined)updateDoubtCounter(data.used,data.limit||doubtLimit)
-      if(data.warning&&data.warningMessage)xp(data.warningMessage)
-      if(data.newConcept&&data.concept&&data.concept!==currentConcept&&currentConcept!==''){
-        showConceptResetBanner(data.concept)
-      } else if(data.concept){
-        currentConcept=data.concept
-      }
-      aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${formatReply(reply)}</div><div class="mt">Now</div><div class="fbr"><button class="fbb" onclick="fbGood(this)">👍 Got it!</button><button class="fbb" onclick="fbBad(this)">👎 Still confused</button></div></div>`
+    try{
+      const base64=e.target.result.split(',')[1]
+      const mimeType=file.type||'image/jpeg'
+      const box=document.getElementById('msgs')
+      if(!box){xp('Chat not ready. Please try again.');return}
+      const initial=STUDENT_NAME.charAt(0).toUpperCase()
+      box.innerHTML+=`<div class="msg me"><div class="mav">${initial}</div><div><img src="${e.target.result}" style="max-width:190px;border-radius:10px;display:block;margin-bottom:3px"><div class="mt">Photo uploaded</div></div></div>`
       box.scrollTop=box.scrollHeight
-      if(window.MathJax)MathJax.typesetPromise([aiDiv]).catch(()=>{})
-      xp('+1 XP')
-    })
-    .catch(err=>{
-      if(err.limitReached){
-        aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${err.message}</div></div>`
-        updateDoubtCounter(doubtLimit,doubtLimit)
-      } else {
-        aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Could not read the photo. Please try again. 🙏</div></div>`
-      }
-    })
+      const aiDiv=document.createElement('div')
+      aiDiv.className='msg ai'
+      aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Reading your photo... 🤔</div></div>`
+      box.appendChild(aiDiv)
+      box.scrollTop=box.scrollHeight
+      conversationHistory.push({role:'user',content:'[Student uploaded a photo of a question]'})
+      fetch('/api/ask',{
+        method:'POST',
+        headers:getHeaders(),
+        body:JSON.stringify({
+          question:'Please read this question from the photo carefully.',
+          imageBase64:base64,
+          imageMimeType:mimeType,
+          studentProfile:{studentClass:getStudentClass(),examGoal,studentName:STUDENT_NAME},
+          thumbsDownCount,
+          conversationHistory:conversationHistory.slice(-6),
+          wantsMarathi
+        })
+      })
+      .then(r=>{
+        if(r.status===429)return r.json().then(d=>{throw{limitReached:true,message:d.error}})
+        if(r.status===401)return r.json().then(d=>{throw{authError:true,message:d.error}})
+        return r.json()
+      })
+      .then(data=>{
+        const reply=data.reply||data.error||'Something went wrong.'
+        conversationHistory.push({role:'assistant',content:reply})
+        if(conversationHistory.length>20)conversationHistory=conversationHistory.slice(-20)
+        if(data.used!==undefined)updateDoubtCounter(data.used,data.limit||doubtLimit)
+        if(data.warning&&data.warningMessage)xp(data.warningMessage)
+        if(data.newConcept&&data.concept&&data.concept!==currentConcept&&currentConcept!==''){
+          showConceptResetBanner(data.concept)
+        } else if(data.concept){
+          currentConcept=data.concept
+        }
+        aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${formatReply(reply)}</div><div class="mt">Now</div><div class="fbr"><button class="fbb" onclick="fbGood(this)">👍 Got it!</button><button class="fbb" onclick="fbBad(this)">👎 Still confused</button></div></div>`
+        box.scrollTop=box.scrollHeight
+        if(window.MathJax)MathJax.typesetPromise([aiDiv]).catch(()=>{})
+        xp('+1 XP')
+      })
+      .catch(err=>{
+        if(err.limitReached){
+          aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${err.message}</div></div>`
+          updateDoubtCounter(doubtLimit,doubtLimit)
+        } else if(err.authError){
+          aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Session expired. Please login again. 🙏</div></div>`
+        } else {
+          aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Could not read the photo. Please try again. 🙏</div></div>`
+        }
+      })
+    }catch(err){
+      console.error('handlePhoto error:',err)
+      xp('Photo error. Please try again. 🙏')
+    }
   }
   reader.readAsDataURL(file)
   setTimeout(()=>{input.value=''},300)
@@ -1715,6 +1726,8 @@ function handlePhoto(input){
 function quickQ(q){document.getElementById('ci').value=q;send()}
 function send(){
   hidePhotoMenu()
+  const hdr=document.getElementById('ch-hdr')
+  if(hdr)hdr.classList.add('hidden')
   const ci=document.getElementById('ci')
   const msg=ci.value.trim()
   if(!msg)return
