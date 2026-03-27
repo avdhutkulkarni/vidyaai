@@ -1589,11 +1589,35 @@ function formatReply(text){
   h=h.replace(/🔘 ([ABC])\. ([^\n]+)/g,'<button class="opt-btn" onclick="optionTap(this,\'$1\')">$1. $2</button>')
   h=h.replace(/^[•\-] (.+)$/gm,'<div class="exp-point">$1</div>')
   h=h.replace(/🔍 Want to know more\?[^\n]*/g,'<div class="fbr"><button class="action-btn" onclick="wantMore(this)">🔍 Want to know more?</button><button class="action-btn" onclick="wantNo(this)">No, I am good</button></div>')
-  
-// Practice question card formatting
+
+  // Numerical flow — "Want complete solution?" button
+  h=h.replace(/Want complete solution\?\s*Yes\s*\/\s*No/g,'<div class="fbr"><button class="action-btn" onclick="wantCompleteSolution(this)">✅ Yes, show solution</button><button class="action-btn" onclick="wantNo(this)">No thanks</button></div>')
+
+  // Numerical flow — "Want to go deeper?" and "Want similar questions?" buttons
+  h=h.replace(/Want to go deeper\?\s*Yes\s*\/\s*No/g,'<div class="fbr"><button class="action-btn" onclick="wantDeeper(this)">🔍 Yes, go deeper</button><button class="action-btn" onclick="wantNo(this)">No thanks</button></div>')
+  h=h.replace(/Want similar questions\?\s*Yes\s*\/\s*No/g,'<div class="fbr"><button class="action-btn" onclick="wantSimilar(this)">📝 Yes, similar questions</button><button class="action-btn" onclick="wantNo(this)">No thanks</button></div>')
+
+  // Practice question cards + auto-save (extract PMETA before rendering)
+  const pmetaMatch=h.match(/\[PMETA\]concept:([^|]+)\|subject:([^\[]+)\[\/PMETA\]/)
+  const pConcept=pmetaMatch?pmetaMatch[1].trim():currentConcept
+  const pSubject=pmetaMatch?pmetaMatch[2].trim():'General'
+  h=h.replace(/\[PMETA\][^\[]*\[\/PMETA\]/g,'')
+  h=h.replace(/📝 Practice Q1 \(Similar\): ([^\n<]+)/g,(m,q)=>{
+    setTimeout(()=>savePracticeQuestion(q.trim(),'similar',pConcept,pSubject),200)
+    return '<div class="practice-card"><div class="practice-card-label">📝 Similar Question</div><div class="practice-q">'+q.trim()+'</div></div>'
+  })
+  h=h.replace(/📝 Practice Q2 \(Tricky\): ([^\n<]+)/g,(m,q)=>{
+    setTimeout(()=>savePracticeQuestion(q.trim(),'tricky',pConcept,pSubject),400)
+    return '<div class="practice-card" style="border-color:rgba(255,77,106,.2)"><div class="practice-card-label" style="color:var(--red)">🔥 Tricky Variation</div><div class="practice-q">'+q.trim()+'</div></div>'
+  })
+
+  // Old practice question format (keep for backward compat)
   h=h.replace(/📝 Practice Question\s*\n([^\n]+)/g,'<div class="practice-card"><div class="practice-card-label">📝 Practice Question</div><div class="practice-q">$1</div></div>')
-  h=h.replace(/🔥 Tricky Variation\s*\n([^\n]+)/g,'<div class="practice-card" style="border-color:rgba(255,77,106,.2)"><div class="practice-card-label" style="color:var(--red)">🔥 Tricky Variation</div><div class="practice-q">$1</div></div>')
   h=h.replace(/📝 Want to practice[^\n]*/g,'<div class="fbr"><button class="action-btn" onclick="wantPractice(this)">📝 Yes, practice question</button><button class="action-btn" onclick="wantNo(this)">No thanks</button></div>')
+
+  // End-of-reply action buttons (catch both Hindi and English variants)
+  h=h.replace(/(?:✅ Samjhla!|✅ Got it!)\s*\|\s*(?:🔄 Nahi samjhla|🔄 Still confused)\s*\|\s*(?:💡 Exam tip chahiye\?|💡 Exam tip\?)/g,
+    '<div class="fbr" style="margin-top:8px;flex-wrap:wrap"><button class="fbb" onclick="doSamjhla(this)">✅ Got it!</button><button class="fbb" onclick="doNahiSamjhla(this)">🔄 Still confused</button><button class="fbb" onclick="doExamTip(this)">💡 Exam tip</button></div>')
 
   h=h.replace(/\n/g,'<br>')
   return h
@@ -1631,7 +1655,44 @@ function optionTap(btn,option){
 function wantMore(btn){disableActionBtns(btn);document.getElementById('ci').value='Yes, I want to know more about this';setTimeout(()=>send(),300)}
 function wantPractice(btn){disableActionBtns(btn);document.getElementById('ci').value='Yes, give me a practice question';setTimeout(()=>send(),300)}
 function wantNo(btn){disableActionBtns(btn);xp('Great! Come back anytime 🙏')}
-function disableActionBtns(btn){const row=btn.closest('.fbr');if(row)row.querySelectorAll('.action-btn').forEach(b=>{b.disabled=true;b.style.opacity='.4'})}
+function wantCompleteSolution(btn){disableActionBtns(btn);document.getElementById('ci').value='Yes, show me the complete solution';setTimeout(()=>send(),300)}
+function wantDeeper(btn){disableActionBtns(btn);document.getElementById('ci').value='Yes, explain this concept in more detail';setTimeout(()=>send(),300)}
+function wantSimilar(btn){disableActionBtns(btn);document.getElementById('ci').value='Yes, give me similar practice questions';setTimeout(()=>send(),300)}
+function disableActionBtns(btn){const row=btn.closest('.fbr');if(row)row.querySelectorAll('.action-btn,.fbb').forEach(b=>{b.disabled=true;b.style.opacity='.4'})}
+
+// ══ SAMJHLA BUTTONS ══
+function doSamjhla(btn){
+  disableActionBtns(btn)
+  thumbsDownCount=0
+  btn.closest('.fbr').innerHTML='<span style="font-size:.62rem;color:var(--green);font-weight:700">✓ Got it!</span>'
+  xp('✓ Great work!')
+}
+function doNahiSamjhla(btn){
+  disableActionBtns(btn)
+  thumbsDownCount++
+  btn.closest('.fbr').innerHTML='<span style="font-size:.62rem;color:var(--amber);font-weight:700">Trying a different way...</span>'
+  document.getElementById('ci').value='I did not understand. Please explain this in a completely different way with a new example.'
+  setTimeout(()=>send(),300)
+}
+function doExamTip(btn){
+  disableActionBtns(btn)
+  btn.closest('.fbr').innerHTML='<span style="font-size:.62rem;color:var(--pur);font-weight:700">Loading exam tip...</span>'
+  document.getElementById('ci').value='Give me an important exam tip for this concept.'
+  setTimeout(()=>send(),300)
+}
+
+// ══ SAVE PRACTICE QUESTION TO FIREBASE ══
+function savePracticeQuestion(question,type,concept,subject){
+  if(!AUTH_TOKEN)return
+  fetch('/api/practice',{
+    method:'POST',
+    headers:getHeaders(),
+    body:JSON.stringify({
+      question,type,concept,subject,
+      studentClass:getStudentClass()
+    })
+  }).catch(()=>{})
+}
 
 // ══ THUMB FUNCTIONS ══
 function fbGood(btn){
@@ -1643,6 +1704,8 @@ function fbBad(btn){
   thumbsDownCount++
   btn.parentElement.innerHTML='<span style="font-size:.62rem;color:var(--amber);font-weight:700">Trying a different approach...</span>'
   xp(thumbsDownCount>=2?'Getting better explanation...':'Trying different approach...')
+  document.getElementById('ci').value='I am still confused. Please explain this in a completely different way with a new example.'
+  setTimeout(()=>send(),300)
 }
 
 // ══ PHOTO UPLOAD (gallery + camera) ══
