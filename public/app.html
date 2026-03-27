@@ -954,12 +954,14 @@ body.day .ct-land{background:linear-gradient(160deg,#E8F4F0,#EEF3F8,var(--bg))}
     </div>
     <div class="cinw">
       <div class="cinr">
-        <!-- Gallery upload -->
         <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)">
-        <div class="phb" onclick="document.getElementById('photo-input').click()" title="Upload from gallery">📷</div>
-        <!-- Direct camera capture -->
         <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)">
-        <div class="cam-btn" onclick="document.getElementById('camera-input').click()" title="Take photo">📸</div>
+        <div class="phb" onclick="showPhotoMenu()" title="Upload photo">📷</div>
+        <div id="photo-menu" style="display:none;position:absolute;bottom:60px;left:12px;background:var(--card2);border:1px solid var(--b2);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:100">
+          <div onclick="document.getElementById('photo-input').click();hidePhotoMenu()" style="padding:12px 20px;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--t1)">📷 Choose from Gallery</div>
+          <div style="height:1px;background:var(--b)"></div>
+          <div onclick="document.getElementById('camera-input').click();hidePhotoMenu()" style="padding:12px 20px;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--t1)">📸 Take Photo</div>
+        </div>
         <textarea class="cin" id="ci" placeholder="Type your doubt..." rows="1" onkeydown="ck(event)"></textarea>
         <button class="sndb" onclick="send()">➤</button>
       </div>
@@ -1472,6 +1474,13 @@ function switchTab(t){
 }
 function evalJig(){xp('💡 Jigyasa evaluation coming soon!')}
 function ck(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+function showPhotoMenu(){
+  const m=document.getElementById('photo-menu')
+  m.style.display=m.style.display==='none'?'block':'none'
+}
+function hidePhotoMenu(){
+  document.getElementById('photo-menu').style.display='none'
+}
 
 // ══ MY DOUBTS ══
 function loadMyDoubts(){
@@ -1690,11 +1699,10 @@ function handlePhoto(input){
 // ══ SEND MESSAGE ══
 function quickQ(q){document.getElementById('ci').value=q;send()}
 function send(){
+  hidePhotoMenu()
   const ci=document.getElementById('ci')
   const msg=ci.value.trim()
   if(!msg)return
-  // Hide header when chat starts
-  document.getElementById('ch-hdr').classList.add('hidden')
   const box=document.getElementById('msgs')
   const initial=STUDENT_NAME.charAt(0).toUpperCase()
   box.innerHTML+=`<div class="msg me"><div class="mav">${initial}</div><div><div class="mbub">${msg}</div><div class="mt">Now</div></div></div>`
