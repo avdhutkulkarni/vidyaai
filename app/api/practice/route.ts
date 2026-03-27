@@ -26,17 +26,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'question and type are required.' }, { status: 400 })
     }
 
+    // Validate type — only allow known values
+    if (!['similar', 'tricky'].includes(type)) {
+      return NextResponse.json({ error: 'Invalid type.' }, { status: 400 })
+    }
+
+    // Cap field lengths to prevent storage abuse
+    const safeQuestion = String(question).slice(0, 1000)
+    const safeConcept = String(concept || 'General').slice(0, 100)
+    const safeSubject = String(subject || 'General').slice(0, 100)
+    const rawClass = Number(studentClass)
+    const safeClass = [9, 10, 11, 12].includes(rawClass) ? rawClass : 12
+
     // ── 3. SAVE TO FIREBASE ──
     await adminDb
       .collection('practiceQuestions')
       .doc(uid)
       .collection('questions')
       .add({
-        question,
-        type,                        // 'similar' | 'tricky'
-        concept: concept || 'General',
-        subject: subject || 'General',
-        studentClass: studentClass || 12,
+        question: safeQuestion,
+        type,
+        concept: safeConcept,
+        subject: safeSubject,
+        studentClass: safeClass,
         solved: false,
         uid,
         createdAt: new Date()

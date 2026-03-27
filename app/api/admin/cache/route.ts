@@ -6,7 +6,10 @@ import { updateSyllabusVersion, getAllSyllabusVersions } from '@/lib/syllabusVer
 // VERIFY ADMIN
 // ─────────────────────────────────────────
 
-const ADMIN_UIDS = (process.env.ADMIN_UIDS || '').split(',').map(u => u.trim())
+const ADMIN_UIDS = (process.env.ADMIN_UIDS || '')
+  .split(',')
+  .map(u => u.trim())
+  .filter(Boolean) // remove empty strings — empty env var → empty array → all denied
 
 async function verifyAdmin(req: NextRequest): Promise<{
   allowed: boolean
@@ -281,6 +284,14 @@ export async function POST(req: NextRequest) {
       if (!collectionPath || !entryId) {
         return NextResponse.json(
           { error: 'collectionPath and entryId required.' },
+          { status: 400 }
+        )
+      }
+
+      // Guard against path traversal — only allow expected cache path format
+      if (!/^class_\d+_[\w.]+\/\w+\/\w+$/.test(collectionPath)) {
+        return NextResponse.json(
+          { error: 'Invalid collectionPath format.' },
           { status: 400 }
         )
       }

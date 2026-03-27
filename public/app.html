@@ -1084,8 +1084,6 @@ function getParam(k){try{return decodeURIComponent(new URLSearchParams(window.lo
 const STUDENT_NAME = getParam('name') || 'Student'
 const STUDENT_LB = getParam('lbname') || 'Student'
 const AUTH_TOKEN = getParam('token') || ''
-console.log('TOKEN:', AUTH_TOKEN ? 'EXISTS length='+AUTH_TOKEN.length : 'MISSING')
-console.log('NAME:', STUDENT_NAME)
 
 
 // ══ STATE ══
