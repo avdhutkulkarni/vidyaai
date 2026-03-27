@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signOut, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
@@ -17,7 +17,7 @@ async function checkApproval(token: string): Promise<boolean> {
   }
 }
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const reason = searchParams.get('reason')
@@ -95,5 +95,13 @@ export default function Home() {
       src="/vidyaai-landing-final.html"
       style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
     />
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   )
 }
