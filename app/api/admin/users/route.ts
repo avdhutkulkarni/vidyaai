@@ -63,24 +63,62 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ── POST — approve / reject / revoke ──
+// ── POST — approve / reject / revoke / add_email / remove_email ──
 export async function POST(req: NextRequest) {
   const adminUid = await verifyAdmin(req)
   if (!adminUid) return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 })
 
   try {
-    const { action, uid } = await req.json()
-    if (!action || !uid) {
-      return NextResponse.json({ error: 'action and uid required.' }, { status: 400 })
+    const body = await req.json()
+    const { action } = body
+
+    if (!action) {
+      return NextResponse.json({ error: 'action required.' }, { status: 400 })
     }
+
+    const now = new Date()
+
+    // ── Add email to whitelist (pre-approve before signup) ──
+    if (action === 'add_email') {
+      const email = String(body.email || '').toLowerCase().trim()
+      if (!email || !email.includes('@')) {
+        return NextResponse.json({ error: 'Valid email required.' }, { status: 400 })
+      }
+      await adminDb.collection('whitelist').doc(email).set({
+        email,
+        plan: body.plan || 'free',
+        addedBy: adminUid,
+        addedAt: now,
+      })
+      // If user already signed up with this email, approve them now
+      const existingSnap = await adminDb.collection('users').where('email', '==', email).limit(1).get()
+      if (!existingSnap.empty) {
+        await existingSnap.docs[0].ref.set(
+          { approved: true, status: 'approved', approvedAt: now, approvedBy: adminUid },
+          { merge: true }
+        )
+        return NextResponse.json({ success: true, message: `${email} added and approved ✓` })
+      }
+      return NextResponse.json({ success: true, message: `${email} added to whitelist ✓` })
+    }
+
+    // ── Remove email from whitelist ──
+    if (action === 'remove_email') {
+      const email = String(body.email || '').toLowerCase().trim()
+      if (!email) return NextResponse.json({ error: 'Email required.' }, { status: 400 })
+      await adminDb.collection('whitelist').doc(email).delete()
+      return NextResponse.json({ success: true, message: `${email} removed from whitelist.` })
+    }
+
+    // ── User actions (require uid) ──
+    const { uid } = body
+    if (!uid) return NextResponse.json({ error: 'uid required.' }, { status: 400 })
 
     const userRef = adminDb.collection('users').doc(uid)
     const userSnap = await userRef.get()
     if (!userSnap.exists) {
       return NextResponse.json({ error: 'User not found.' }, { status: 404 })
     }
-
-    const now = new Date()
 
     if (action === 'approve') {
       await userRef.set(

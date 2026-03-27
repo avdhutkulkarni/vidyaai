@@ -3,6 +3,9 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin'
 
+const ADMIN_UIDS = (process.env.ADMIN_UIDS || '')
+  .split(',').map(u => u.trim()).filter(Boolean)
+
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization')
@@ -20,31 +23,50 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Session expired.' }, { status: 401 })
     }
 
+    // Admin UIDs are always approved — auto-create/update their doc
+    if (ADMIN_UIDS.includes(uid)) {
+      const userRef = adminDb.collection('users').doc(uid)
+      await userRef.set(
+        { uid, email, displayName, approved: true, status: 'approved', plan: 'admin', lastActive: new Date() },
+        { merge: true }
+      )
+      return NextResponse.json({ approved: true, status: 'approved', plan: 'admin' })
+    }
+
     const userRef = adminDb.collection('users').doc(uid)
     const userSnap = await userRef.get()
 
     if (!userSnap.exists) {
-      // New user — create pending record
+      // Check whitelist — admin may have pre-approved this email
+      const whitelistSnap = await adminDb.collection('whitelist').doc(email.toLowerCase()).get()
+      const whitelisted = whitelistSnap.exists
+
       await userRef.set({
         uid,
         email,
         displayName,
-        approved: false,
-        status: 'pending',
-        plan: 'free',
+        approved: whitelisted,
+        status: whitelisted ? 'approved' : 'pending',
+        plan: whitelistSnap.data()?.plan || 'free',
         createdAt: new Date(),
         lastActive: new Date(),
       }, { merge: true })
 
-      return NextResponse.json({ approved: false, status: 'pending' })
+      return NextResponse.json({
+        approved: whitelisted,
+        status: whitelisted ? 'approved' : 'pending'
+      })
     }
 
     const userData = userSnap.data()!
 
-    // Backfill email/name if missing (existing users)
+    // Backfill email/name if missing
     if (!userData.email || !userData.displayName) {
       await userRef.set({ email, displayName }, { merge: true })
     }
+
+    // Update last active
+    await userRef.set({ lastActive: new Date() }, { merge: true })
 
     // Paid users are always approved
     if (userData.plan === 'boost' && !userData.approved) {

@@ -37,6 +37,8 @@ export default function AdminPage() {
   const [dataLoading, setDataLoading] = useState(false)
   const [actionUid, setActionUid] = useState<string | null>(null)
   const [toast, setToast] = useState('')
+  const [addEmail, setAddEmail] = useState('')
+  const [addingEmail, setAddingEmail] = useState(false)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -76,6 +78,26 @@ export default function AdminPage() {
   useEffect(() => {
     if (user) fetchUsers(tab)
   }, [user, tab, fetchUsers])
+
+  const handleAddEmail = async () => {
+    const email = addEmail.trim()
+    if (!email || !email.includes('@')) { showToast('Enter a valid email.'); return }
+    const token = await getToken()
+    if (!token) return
+    setAddingEmail(true)
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add_email', email })
+      })
+      const data = await res.json()
+      showToast(data.message || data.error || '')
+      setAddEmail('')
+      fetchUsers(tab)
+    } catch { showToast('Something went wrong.') }
+    setAddingEmail(false)
+  }
 
   const handleAction = async (uid: string, action: string) => {
     const token = await getToken()
@@ -199,6 +221,30 @@ export default function AdminPage() {
         {tabBtn('approved', 'Approved')}
         {tabBtn('rejected', 'Rejected')}
         {tabBtn('all', 'All Users')}
+      </div>
+
+      {/* Add Student Email */}
+      <div style={{ padding: '14px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 12, color: C.t2, fontWeight: 600, whiteSpace: 'nowrap' }}>Add student email:</span>
+        <input
+          type="email"
+          value={addEmail}
+          onChange={e => setAddEmail(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAddEmail()}
+          placeholder="student@gmail.com"
+          style={{
+            flex: 1, minWidth: 200, padding: '7px 12px', background: C.card2, color: C.t1,
+            border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 13, outline: 'none'
+          }}
+        />
+        <button
+          onClick={handleAddEmail}
+          disabled={addingEmail}
+          style={{ padding: '7px 18px', background: C.cyan, color: '#000', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: addingEmail ? 0.6 : 1, whiteSpace: 'nowrap' }}
+        >
+          {addingEmail ? 'Adding...' : '+ Add & Approve'}
+        </button>
+        <span style={{ fontSize: 11, color: C.t2 }}>Student gets instant access when they sign in with this email</span>
       </div>
 
       {/* Content */}
