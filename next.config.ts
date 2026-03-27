@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https://*.googleusercontent.com",
               "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com",
               "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
-              "frame-ancestors 'none'",
+              "frame-ancestors 'self'",
             ].join('; ')
           },
         ],
