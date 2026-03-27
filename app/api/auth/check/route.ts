@@ -37,25 +37,19 @@ export async function POST(req: NextRequest) {
     const userSnap = await userRef.get()
 
     if (!userSnap.exists) {
-      // Check whitelist — admin may have pre-approved this email
-      const whitelistSnap = await adminDb.collection('whitelist').doc(email.toLowerCase()).get()
-      const whitelisted = whitelistSnap.exists
-
+      // Auto-approve all new users for now
       await userRef.set({
         uid,
         email,
         displayName,
-        approved: whitelisted,
-        status: whitelisted ? 'approved' : 'pending',
-        plan: whitelistSnap.data()?.plan || 'free',
+        approved: true,
+        status: 'approved',
+        plan: 'free',
         createdAt: new Date(),
         lastActive: new Date(),
       }, { merge: true })
 
-      return NextResponse.json({
-        approved: whitelisted,
-        status: whitelisted ? 'approved' : 'pending'
-      })
+      return NextResponse.json({ approved: true, status: 'approved' })
     }
 
     const userData = userSnap.data()!
@@ -65,18 +59,16 @@ export async function POST(req: NextRequest) {
       await userRef.set({ email, displayName }, { merge: true })
     }
 
-    // Update last active
-    await userRef.set({ lastActive: new Date() }, { merge: true })
-
-    // Paid users are always approved
-    if (userData.plan === 'boost' && !userData.approved) {
-      await userRef.set({ approved: true, status: 'approved' }, { merge: true })
-      return NextResponse.json({ approved: true, status: 'approved', plan: 'boost' })
+    // Update last active + ensure approved
+    if (!userData.approved) {
+      await userRef.set({ approved: true, status: 'approved', lastActive: new Date() }, { merge: true })
+    } else {
+      await userRef.set({ lastActive: new Date() }, { merge: true })
     }
 
     return NextResponse.json({
-      approved: userData.approved === true,
-      status: userData.status || 'pending',
+      approved: true,
+      status: 'approved',
       plan: userData.plan || 'free',
     })
 
