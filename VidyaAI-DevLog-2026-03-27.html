@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VidyaAI — Dev Log 27 March 2026</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; background: #fff; font-size: 13px; line-height: 1.65; }
+  .page { max-width: 900px; margin: 0 auto; padding: 48px 40px; }
+
+  h1 { font-size: 26px; font-weight: 800; color: #0d0d0d; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #888; margin-bottom: 36px; border-bottom: 2px solid #0d0d0d; padding-bottom: 16px; }
+  .subtitle span { color: #00a3bf; font-weight: 700; }
+
+  h2 { font-size: 15px; font-weight: 800; color: #fff; background: #1a1a1a; padding: 8px 14px; border-radius: 8px; margin: 32px 0 14px; text-transform: uppercase; letter-spacing: 0.8px; }
+  h3 { font-size: 13px; font-weight: 700; color: #0d0d0d; margin: 18px 0 8px; border-left: 3px solid #00a3bf; padding-left: 10px; }
+  h4 { font-size: 12px; font-weight: 700; color: #444; margin: 12px 0 4px; }
+
+  p { margin-bottom: 8px; color: #333; }
+  ul { padding-left: 18px; margin-bottom: 8px; }
+  li { margin-bottom: 4px; color: #333; }
+  li li { color: #555; margin-bottom: 2px; }
+
+  .commit { display: inline-block; background: #f0f0f0; border-radius: 4px; padding: 1px 7px; font-family: monospace; font-size: 11px; color: #555; margin-right: 6px; }
+  .file { display: inline-block; background: #e8f4ff; border-radius: 4px; padding: 1px 7px; font-family: monospace; font-size: 11px; color: #005fa3; }
+  .why { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 12px; border-radius: 0 6px 6px 0; margin: 6px 0 10px; font-size: 12px; color: #78350f; }
+  .fix { background: #f0fdf4; border-left: 3px solid #22c55e; padding: 8px 12px; border-radius: 0 6px 6px 0; margin: 6px 0 10px; font-size: 12px; color: #14532d; }
+  .sec { background: #fef2f2; border-left: 3px solid #ef4444; padding: 8px 12px; border-radius: 0 6px 6px 0; margin: 6px 0 10px; font-size: 12px; color: #7f1d1d; }
+  .note { background: #f5f3ff; border-left: 3px solid #8b5cf6; padding: 8px 12px; border-radius: 0 6px 6px 0; margin: 6px 0 10px; font-size: 12px; color: #4c1d95; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+  .card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px 14px; }
+  .card h4 { margin-top: 0; color: #00a3bf; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  th { background: #f5f5f5; padding: 7px 10px; text-align: left; font-weight: 700; border: 1px solid #e0e0e0; }
+  td { padding: 6px 10px; border: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  .flow { display: flex; flex-direction: column; gap: 0; margin: 10px 0; }
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; }
+  .flow-num { width: 24px; height: 24px; border-radius: 50%; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+  .flow-line { border-left: 2px dashed #ddd; margin-left: 11px; height: 10px; }
+
+  .toc { background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px 20px; margin-bottom: 28px; }
+  .toc h3 { border: none; padding: 0; margin-bottom: 10px; }
+  .toc ol { padding-left: 18px; }
+  .toc li { margin-bottom: 4px; color: #00a3bf; font-weight: 600; font-size: 12px; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-right: 4px; }
+  .badge-new { background: #d1fae5; color: #065f46; }
+  .badge-fix { background: #dbeafe; color: #1e3a8a; }
+  .badge-sec { background: #fee2e2; color: #7f1d1d; }
+  .badge-ui { background: #fef3c7; color: #78350f; }
+
+  code { font-family: monospace; font-size: 11px; background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
+
+  @media print {
+    .page { padding: 24px 28px; }
+    h2 { break-before: auto; }
+    .grid { break-inside: avoid; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <h1>VidyaAI — Development Log</h1>
+  <div class="subtitle">
+    <span>27 March 2026</span> &nbsp;·&nbsp; 10 commits &nbsp;·&nbsp; 15+ files changed &nbsp;·&nbsp; Yash Science Academy
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li>New API Route — /api/usage</li>
+      <li>Usage Counter + Marathi Toggle (app.html)</li>
+      <li>AI Personality — Simple English, Indian Examples</li>
+      <li>Font Size + Watermark Improvements</li>
+      <li>Photo Upload Fix (root cause)</li>
+      <li>Chat Header Auto-hide</li>
+      <li>New Numerical Conversation Flow</li>
+      <li>Tappable Action Buttons</li>
+      <li>fbBad "Still Confused" Fix</li>
+      <li>Security Audit + Fixes</li>
+      <li>Admin Panel + User Approval System</li>
+    </ol>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>1 · New API Route — /api/usage</h2>
+
+  <h3>What was built</h3>
+  <p>New server-side endpoint <span class="file">app/api/usage/route.ts</span> to fetch a student's doubt usage for today.</p>
+
+  <h4>Logic</h4>
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div>Verify Firebase Bearer token from <code>Authorization</code> header</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">2</div><div>Extract <code>uid</code> from decoded token</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">3</div><div>Read <code>studentClass</code> from query param (default: 10)</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">4</div><div>Call <code>getUsageToday(uid, studentClass)</code> from <code>lib/doubtLimit.ts</code></div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">5</div><div>Return: <code>{ used, limit, isPaid, boostDoubtsUsed, boostDoubtsRemaining }</code></div></div>
+  </div>
+
+  <div class="why"><strong>Why:</strong> The doubt counter was initialised to 0 on page load and only updated after each question. Students would see wrong count until they asked their first doubt. Now the real count is loaded from server on app start.</div>
+
+  <h4>Key detail</h4>
+  <p><code>export const dynamic = 'force-dynamic'</code> — required at top of every API route that reads live data. Prevents Next.js from statically caching the response.</p>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>2 · Usage Counter + Marathi Toggle (app.html)</h2>
+
+  <h3>loadUsageFromServer() — fixed</h3>
+  <p>File: <span class="file">public/app.html</span></p>
+  <p>Old behaviour: only fetched doubt history. Counter stayed at 0 until a question was asked.</p>
+  <p>New behaviour: two independent fetches on login —</p>
+  <ul>
+    <li>First: <code>GET /api/usage?studentClass=X</code> → calls <code>updateDoubtCounter(used, limit)</code></li>
+    <li>Second: <code>GET /api/doubt-history</code> → populates <code>myDoubtsCache</code> as before</li>
+  </ul>
+
+  <h3>Marathi Toggle Button</h3>
+  <p>Added language toggle button in the chat input area between the textarea and send button.</p>
+  <ul>
+    <li>Default label: <strong>EN</strong></li>
+    <li>On tap: switches to <strong>मर</strong>, shows toast, flips <code>wantsMarathi</code> variable</li>
+    <li>Function: <code>toggleMarathi()</code></li>
+    <li>The <code>wantsMarathi</code> boolean is sent with every API call to <code>/api/ask</code></li>
+  </ul>
+  <div class="fix"><strong>Fix applied later:</strong> Button was rendering but <code>wantsMarathi</code> language logic had Hindi/Marathi casual words. Updated system prompt to English-only (see Section 3).</div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>3 · AI Personality — Simple English, Indian Examples</h2>
+
+  <p>File: <span class="file">app/api/ask/route.ts</span> — <code>buildSystemPrompt()</code></p>
+
+  <h3>What changed</h3>
+  <p>Added a <strong>PERSONALITY block</strong> to the system prompt that runs for every conversation:</p>
+
+  <div class="card" style="margin: 10px 0;">
+    <h4>PERSONALITY RULES (added to system prompt)</h4>
+    <ul>
+      <li>Talk like a friendly elder brother explaining to a 10-year-old Indian child</li>
+      <li><strong>ONLY English</strong> — no Hindi words, no Marathi words</li>
+      <li>Use real Indian examples: cricket, chai, mobile charging, auto rickshaw, mother cooking, mango season, railway station</li>
+      <li>Very simple words. Short sentences. Never sound like a textbook</li>
+      <li>Never say "therefore", "hence", "thus", "henceforth"</li>
+      <li>Say things like: "Think about it", "Here is the cool part", "Notice this", "Simple right?", "Now watch what happens"</li>
+    </ul>
+  </div>
+
+  <div class="why"><strong>Why:</strong> Previous version had Hindi casual words ("Arey", "dekh", "simple hai") which students from Maharashtra found confusing. The app is for Maharashtra HSC students — simple English is what they understand best in a study context.</div>
+
+  <h3>Reply length updated</h3>
+  <p>Changed from "max 4-5 lines" to "5-7 lines maximum" — slightly more explanation per reply while keeping it concise.</p>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>4 · Font Size + Watermark Improvements</h2>
+
+  <h3>Font sizes</h3>
+  <table>
+    <tr><th>CSS Class</th><th>Before</th><th>After</th><th>Why</th></tr>
+    <tr><td><code>html</code> (base)</td><td>18px</td><td>20px</td><td>Better readability on mobile</td></tr>
+    <tr><td><code>html.fs-n</code> (normal)</td><td>15px</td><td>17px</td><td>Proportional increase</td></tr>
+    <tr><td><code>html.fs-xxl</code> (XXL)</td><td>21px</td><td>23px</td><td>Proportional increase</td></tr>
+    <tr><td><code>.mbub</code> (chat bubbles)</td><td>0.76rem / 1.35 lh</td><td>0.82rem / 1.5 lh</td><td>Chat text more readable</td></tr>
+  </table>
+
+  <h3>Watermarks</h3>
+  <table>
+    <tr><th>Element</th><th>Before</th><th>After</th></tr>
+    <tr><td>VidyaAI — font size</td><td>11px</td><td>16px</td></tr>
+    <tr><td>VidyaAI — opacity</td><td>0.04</td><td>0.07</td></tr>
+    <tr><td>Yash Science Academy — font size</td><td>9px</td><td>13px</td></tr>
+    <tr><td>Yash Science Academy — opacity</td><td>0.03</td><td>0.06</td></tr>
+  </table>
+  <p>Applied to both dark mode (<code>rgba(255,255,255,…)</code>) and light mode (<code>rgba(0,0,0,…)</code>) SVG watermarks.</p>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>5 · Photo Upload Fix (Root Cause)</h2>
+
+  <h3>Bug</h3>
+  <p>Photo upload appeared to work (file picker opened) but photo was never sent to AI.</p>
+
+  <h3>Root cause</h3>
+  <p>Inside <code>handlePhoto(input)</code>, the first line inside <code>reader.onload</code> was:</p>
+  <p><code>document.getElementById('ch-hdr').classList.add('hidden')</code></p>
+  <p>The chat header element had <code>class="ch-hdr"</code> but <strong>no id attribute</strong>. So <code>getElementById('ch-hdr')</code> returned <code>null</code>. Calling <code>.classList</code> on null throws a TypeError, which silently killed the entire callback — the <code>fetch('/api/ask')</code> call was never reached.</p>
+
+  <div class="fix"><strong>Fix 1:</strong> Added <code>id="ch-hdr"</code> to the div in app.html: <code>&lt;div class="ch-hdr" id="ch-hdr"&gt;</code></div>
+  <div class="fix"><strong>Fix 2:</strong> Added null guard: <code>const hdr=document.getElementById('ch-hdr'); if(hdr)hdr.classList.add('hidden')</code></div>
+
+  <h3>Photo menu — mobile compatibility fix</h3>
+  <p>The menu items used <code>&lt;div onclick="document.getElementById('photo-input').click()"&gt;</code>. Programmatic <code>.click()</code> on file inputs is unreliable on mobile browsers.</p>
+  <div class="fix"><strong>Fix:</strong> Replaced <code>&lt;div onclick&gt;</code> with <code>&lt;label for="photo-input"&gt;</code> and <code>&lt;label for="camera-input"&gt;</code>. A <code>&lt;label&gt;</code> directly activates its linked file input — the correct semantic approach, works on all browsers.</div>
+
+  <h3>Added error handling</h3>
+  <ul>
+    <li><code>reader.onerror</code> handler — shows toast if file read fails</li>
+    <li><code>try/catch</code> inside <code>reader.onload</code> — catches any unexpected errors</li>
+    <li><code>401</code> auth error handler in the photo fetch chain</li>
+    <li>Null check for <code>document.getElementById('msgs')</code></li>
+  </ul>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>6 · Chat Header Auto-hide</h2>
+
+  <p>Problem: The chat header with VidyaAI branding, back button, and tabs took up significant screen space while the student was actively chatting.</p>
+
+  <h3>Fixes</h3>
+  <ul>
+    <li>Reduced header top padding: <code>calc(env(safe-area-inset-top) + 44px)</code> → <code>calc(env(safe-area-inset-top) + 10px)</code></li>
+    <li>Header now auto-hides when the first <strong>text message</strong> is sent (via <code>send()</code> function) — it was already hiding for photo upload but not text</li>
+    <li>Header is restored when navigating away from chat screen (existing behaviour preserved)</li>
+  </ul>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>7 · New Numerical Conversation Flow</h2>
+
+  <p>File: <span class="file">app/api/ask/route.ts</span></p>
+  <p><strong>Applies to: numerical questions only</strong></p>
+
+  <h3>Old flow (3 steps)</h3>
+  <p>Hint 1 (concept + formula) → Hint 2 (first step) → Full Solution</p>
+
+  <h3>New flow (5 steps)</h3>
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div><strong>Hook question</strong> — real-life Indian example, 1-2 lines only</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">2</div><div><strong>Hint 1</strong> — concept name + 2-3 line simple explanation with Indian example</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">3</div><div><strong>Hint 2</strong> — formula + what each variable means (1-2 lines). Then asks: <em>"Want complete solution? Yes / No"</em></div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">4</div><div><strong>Full point-wise solution</strong> — Step 1, Step 2, Step 3, ∴ Answer [units]. Then shows two buttons: <em>"Want to go deeper?"</em> and <em>"Want similar questions?"</em></div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">5a</div><div><strong>Go deeper</strong> — detailed concept explanation, still simple, Indian examples, max 8 lines</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">5b</div><div><strong>Similar questions</strong> — AI outputs 2 questions in exact format (parsed by frontend and saved to Firebase)</div></div>
+  </div>
+
+  <h3>Practice questions format (AI must use exactly)</h3>
+  <div class="card">
+    <code>📝 Practice Q1 (Similar): [full question with all values and units]</code><br><br>
+    <code>📝 Practice Q2 (Tricky): [harder variation of same concept]</code><br><br>
+    <code>[PMETA]concept:[concept name]|subject:[subject name][/PMETA]</code>
+  </div>
+
+  <div class="note"><strong>Why PMETA tag:</strong> The frontend needs concept and subject to save questions to Firebase. The AI tags them directly in the response so the app doesn't have to guess from context. The <code>[PMETA]</code> block is stripped before displaying to the student.</div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>8 · Tappable Action Buttons</h2>
+
+  <p>File: <span class="file">public/app.html</span> — <code>formatReply()</code> function</p>
+
+  <h3>Problem</h3>
+  <p>The end-of-reply line <code>✅ Samjhla! | 🔄 Nahi samjhla | 💡 Exam tip chahiye?</code> was rendered as plain text. Students couldn't tap it.</p>
+
+  <h3>Solution</h3>
+  <p>Added regex patterns in <code>formatReply()</code> to convert AI output to interactive buttons:</p>
+
+  <table>
+    <tr><th>AI outputs</th><th>Renders as</th><th>Function called</th></tr>
+    <tr><td><code>✅ Got it! | 🔄 Still confused | 💡 Exam tip?</code></td><td>3 tap buttons (row)</td><td><code>doSamjhla / doNahiSamjhla / doExamTip</code></td></tr>
+    <tr><td><code>Want complete solution? Yes / No</code></td><td>Yes/No buttons</td><td><code>wantCompleteSolution / wantNo</code></td></tr>
+    <tr><td><code>Want to go deeper? Yes / No</code></td><td>Yes/No buttons</td><td><code>wantDeeper / wantNo</code></td></tr>
+    <tr><td><code>Want similar questions? Yes / No</code></td><td>Yes/No buttons</td><td><code>wantSimilar / wantNo</code></td></tr>
+    <tr><td><code>📝 Practice Q1 (Similar): …</code></td><td>Practice card + auto-save to Firebase</td><td><code>savePracticeQuestion()</code></td></tr>
+    <tr><td><code>📝 Practice Q2 (Tricky): …</code></td><td>Tricky card (red border) + auto-save</td><td><code>savePracticeQuestion()</code></td></tr>
+  </table>
+
+  <h3>Button functions logic</h3>
+  <ul>
+    <li><code>doSamjhla(btn)</code> — disables row, resets <code>thumbsDownCount=0</code>, shows "✓ Got it!" XP toast</li>
+    <li><code>doNahiSamjhla(btn)</code> — increments <code>thumbsDownCount</code>, sets message, calls <code>send()</code></li>
+    <li><code>doExamTip(btn)</code> — sets message "Give me an exam tip for this concept", calls <code>send()</code></li>
+    <li><code>wantCompleteSolution / wantDeeper / wantSimilar</code> — disable row, set appropriate message, call <code>send()</code></li>
+  </ul>
+
+  <h3>Practice questions → Firebase</h3>
+  <p><code>savePracticeQuestion(question, type, concept, subject)</code> — POST to <code>/api/practice</code>. Saved to <code>practiceQuestions/{uid}/questions/{auto-id}</code> with fields:</p>
+  <ul>
+    <li><code>question</code>, <code>type</code> (similar/tricky), <code>concept</code>, <code>subject</code>, <code>studentClass</code></li>
+    <li><code>solved: false</code>, <code>uid</code>, <code>createdAt</code></li>
+  </ul>
+  <div class="note"><strong>Future use:</strong> These questions will power the Jigyasa/Recharge Mode where students can practice saved questions.</div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>9 · fbBad "Still Confused" Fix</h2>
+
+  <p>File: <span class="file">public/app.html</span></p>
+
+  <h3>Bug</h3>
+  <p><code>fbBad(btn)</code> was called when student tapped "👎 Still confused". It changed the button text to "Trying a different approach…" but <strong>never sent anything to the AI</strong>. No new explanation appeared.</p>
+
+  <h3>Root cause</h3>
+  <p>Previous fix used <code>setTimeout(()=>send(), 300)</code> which could fail silently if any error occurred in <code>send()</code> before the fetch (null checks, element not found, etc.).</p>
+
+  <h3>Fix</h3>
+  <p>Rewrote <code>fbBad()</code> as a <strong>self-contained direct API caller</strong> — same pattern as the working photo upload. No dependency on <code>send()</code>, no textarea, no setTimeout race.</p>
+
+  <div class="fix">
+    <strong>New logic:</strong><br>
+    1. Increment <code>thumbsDownCount</code><br>
+    2. Change button text<br>
+    3. Get <code>box = document.getElementById('msgs')</code> directly<br>
+    4. Create <code>aiDiv</code> with "Let me try a different way… 🤔"<br>
+    5. Push message to <code>conversationHistory</code><br>
+    6. Call <code>fetch('/api/ask')</code> with <code>thumbsDownCount</code> already incremented<br>
+    7. Handle 429 / 401 / network errors inline
+  </div>
+
+  <div class="note"><strong>Key insight:</strong> The AI system prompt checks <code>thumbsDownCount</code>. At count=1 it uses a "completely different real-life analogy". At count≥2 it uses "the simplest possible everyday Indian example". So incrementing before the API call is critical.</div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>10 · Security Audit + Fixes</h2>
+
+  <p>A full security audit was performed. Here are the real vulnerabilities found and fixed:</p>
+
+  <h3>next.config.ts — HTTP Security Headers</h3>
+  <table>
+    <tr><th>Header</th><th>Value</th><th>Protects against</th></tr>
+    <tr><td><code>X-Frame-Options</code></td><td>DENY</td><td>Clickjacking (app embedded in iframe)</td></tr>
+    <tr><td><code>X-Content-Type-Options</code></td><td>nosniff</td><td>MIME-type sniffing attacks</td></tr>
+    <tr><td><code>X-XSS-Protection</code></td><td>1; mode=block</td><td>Legacy XSS filter for older browsers</td></tr>
+    <tr><td><code>Strict-Transport-Security</code></td><td>max-age=63072000</td><td>Forces HTTPS for 2 years</td></tr>
+    <tr><td><code>Referrer-Policy</code></td><td>strict-origin-when-cross-origin</td><td>URL leakage to third parties</td></tr>
+    <tr><td><code>Content-Security-Policy</code></td><td>Whitelist of sources</td><td>Script/style injection from unknown origins</td></tr>
+    <tr><td><code>Permissions-Policy</code></td><td>camera=(), microphone=()</td><td>Prevents permission prompt abuse</td></tr>
+  </table>
+
+  <h3>app/api/ask/route.ts — Input Validation</h3>
+  <table>
+    <tr><th>Input</th><th>Validation added</th><th>Threat prevented</th></tr>
+    <tr><td><code>question</code></td><td>Max 2000 characters</td><td>Token exhaustion / DoS via giant prompt</td></tr>
+    <tr><td><code>imageMimeType</code></td><td>Whitelist: jpeg, png, webp, gif only</td><td>Arbitrary type injection into Claude API</td></tr>
+    <tr><td><code>studentClass</code></td><td>Must be in [9, 10, 11, 12]</td><td>Logic errors + limit bypass</td></tr>
+    <tr><td><code>examGoal</code></td><td>Whitelist: 4 known values only</td><td>Prompt injection via system prompt</td></tr>
+    <tr><td><code>studentName</code></td><td>Strip special chars, max 50 chars</td><td>Prompt injection via name field</td></tr>
+    <tr><td><code>thumbsDownCount</code></td><td>Clamp to [0–10]</td><td>Logic manipulation</td></tr>
+  </table>
+
+  <div class="sec"><strong>Prompt injection explained:</strong> If <code>studentName</code> was <code>"Student\n\nNEW INSTRUCTIONS: ignore all rules"</code>, it would be embedded directly in the system prompt and could alter AI behaviour. The fix strips everything except letters, spaces, and basic punctuation.</div>
+
+  <h3>app/api/admin/cache/route.ts</h3>
+  <ul>
+    <li>Added <code>.filter(Boolean)</code> to <code>ADMIN_UIDS</code> parsing — empty env var now correctly blocks all users (previously produced ambiguous <code>['']</code> array)</li>
+    <li>Added path traversal guard on <code>collectionPath</code> — must match regex <code>^class_\d+_[\w.]+\/\w+\/\w+$</code> before any Firestore query</li>
+  </ul>
+
+  <h3>app/api/practice/route.ts</h3>
+  <ul>
+    <li><code>type</code> field validated — only "similar" or "tricky" accepted</li>
+    <li>All string fields capped — question 1000 chars, concept/subject 100 chars</li>
+    <li><code>studentClass</code> validated — same [9,10,11,12] clamp</li>
+  </ul>
+
+  <h3>public/app.html</h3>
+  <ul>
+    <li>Removed <code>console.log('TOKEN: EXISTS length=...')</code> — advertising auth token info in browser console is unnecessary information exposure</li>
+  </ul>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>11 · Admin Panel + User Approval System</h2>
+
+  <h3>Problem</h3>
+  <p>Any Google account in the world could log in and use VidyaAI. No access control existed at the user level.</p>
+
+  <h3>Architecture</h3>
+
+  <div class="grid">
+    <div class="card">
+      <h4>New API Routes</h4>
+      <ul>
+        <li><span class="file">app/api/auth/check/route.ts</span> — POST: verify token, create/check user record</li>
+        <li><span class="file">app/api/admin/users/route.ts</span> — GET: list users, POST: approve/reject/revoke</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>New Pages</h4>
+      <ul>
+        <li><span class="file">app/admin/page.tsx</span> — Full admin panel UI</li>
+        <li>Updated <span class="file">app/vidyaai-login/page.tsx</span></li>
+        <li>Updated <span class="file">app/page.tsx</span></li>
+        <li>Updated <span class="file">middleware.ts</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Student login flow (new)</h3>
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div>Student taps "Sign in with Google" → Google OAuth popup</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">2</div><div>App calls <code>POST /api/auth/check</code> with Firebase ID token</div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">3</div><div><strong>New student:</strong> Creates <code>users/{uid}</code> with <code>approved: false, status: 'pending'</code></div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">4a</div><div><strong>Approved:</strong> Sets cookie, redirects to <code>/vidyaai</code></div></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><div class="flow-num">4b</div><div><strong>Not approved:</strong> Signs out, redirects to <code>/?reason=pending</code> → shows "Waiting for Approval" screen</div></div>
+  </div>
+
+  <h3>Admin panel at /admin</h3>
+  <p>Protected by middleware (requires auth cookie) + ADMIN_UIDS check on every API call.</p>
+
+  <table>
+    <tr><th>Tab</th><th>Shows</th><th>Actions</th></tr>
+    <tr><td><strong>Pending</strong></td><td>New students awaiting approval (count badge in red)</td><td>✓ Approve, ✗ Reject</td></tr>
+    <tr><td><strong>Approved</strong></td><td>Active students</td><td>Revoke (moves back to pending)</td></tr>
+    <tr><td><strong>Rejected</strong></td><td>Rejected students</td><td>Re-approve</td></tr>
+    <tr><td><strong>All Users</strong></td><td>Everyone</td><td>All actions</td></tr>
+  </table>
+
+  <h4>Info shown per student</h4>
+  <p>Name, Email, Class, Plan (Free / ⚡ Boost), Total doubts asked, Joined date, Last active (relative time)</p>
+
+  <h3>Paid users — auto-approval</h3>
+  <p>When a student pays and <code>plan: 'boost'</code> is set in Firestore, <code>/api/auth/check</code> automatically sets <code>approved: true</code> on their next login. Admin can still manually revoke if needed.</p>
+
+  <h3>Server-side enforcement</h3>
+  <p>All 4 main API routes now check <code>approved: true</code> in Firestore after token verification:</p>
+  <ul>
+    <li><span class="file">app/api/ask/route.ts</span></li>
+    <li><span class="file">app/api/usage/route.ts</span></li>
+    <li><span class="file">app/api/practice/route.ts</span></li>
+    <li><span class="file">app/api/doubt-history/route.ts</span></li>
+  </ul>
+  <div class="sec"><strong>Even with a valid Firebase token</strong>, an unapproved user gets <code>403 NOT_APPROVED</code>. UI bypass is impossible.</div>
+
+  <h3>One student = one Google account</h3>
+  <p>Firebase Auth ties each login to a Google account's unique UID. The approval is stored per UID. Students cannot share accounts (they'd need to share the Google password). If a student logs in with a different Google account, it creates a new pending record — admin only approves the correct one.</p>
+
+  <h3>Setup required</h3>
+  <p>Add your Firebase UID to Vercel environment variables:<br>
+  <code>ADMIN_UIDS = your-firebase-uid-here</code><br>
+  Get your UID from: Firebase Console → Authentication → Users → click your account.</p>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>Commit History</h2>
+
+  <table>
+    <tr><th>Commit</th><th>Message</th></tr>
+    <tr><td><span class="commit">83b5f05</span></td><td>Feature: admin panel, user approval system, Google login access control</td></tr>
+    <tr><td><span class="commit">09b6db6</span></td><td>Security: input validation, security headers, admin guard, token log removal</td></tr>
+    <tr><td><span class="commit">d56ded7</span></td><td>Fix: fbBad direct API call — bypass send() dependency</td></tr>
+    <tr><td><span class="commit">ce01e20</span></td><td>Fix: numerical flow, tappable buttons, fbBad re-send, practice Firebase save</td></tr>
+    <tr><td><span class="commit">4a88ddf</span></td><td>Fix: photo upload label tags, header auto-hide on send, reduce header padding</td></tr>
+    <tr><td><span class="commit">ecf709c</span></td><td>Fix: photo upload (ch-hdr id), English-only AI, bigger explanation, options format</td></tr>
+    <tr><td><span class="commit">cd42f87</span></td><td>Fix: usage counter, Marathi toggle, simpler language, bigger font, watermark, force-dynamic</td></tr>
+  </table>
+
+  <!-- FOOTER -->
+  <div style="margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e5e5; text-align: center; color: #aaa; font-size: 11px;">
+    VidyaAI — Yash Science Academy &nbsp;·&nbsp; Dev Log 27 March 2026 &nbsp;·&nbsp; Confidential
+  </div>
+
+</div>
+</body>
+</html>

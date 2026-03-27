@@ -308,7 +308,7 @@ export async function POST(req: NextRequest) {
     const {
       question,
       studentProfile,
-      thumbsDownCount: rawThumbsDown = 0,
+      thumbsDownCount = 0,
       conversationHistory = [],
       wantsMarathi = false,
       imageBase64,
@@ -345,14 +345,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Question length cap — prevents token exhaustion / DoS
-    if (question && question.length > 2000) {
-      return NextResponse.json(
-        { error: 'Question is too long. Please keep it under 2000 characters.' },
-        { status: 400 }
-      )
-    }
-
     // ── 3. IMAGE SIZE CHECK ──
     if (imageBase64) {
       const sizeInMB = (imageBase64.length * 0.75) / (1024 * 1024)
@@ -362,37 +354,14 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         )
       }
-      // Whitelist MIME types — prevent arbitrary type injection
-      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-      if (imageMimeType && !allowedMimeTypes.includes(imageMimeType)) {
-        return NextResponse.json(
-          { error: 'Invalid image type. Please use JPEG, PNG, or WebP.' },
-          { status: 400 }
-        )
-      }
     }
 
-    // ── 4. STUDENT PROFILE — validate and sanitize ──
-    // Clamp class to valid range (9–12), strip prompt-injection chars from name/goal
-    const rawClass = Number(studentProfile?.studentClass)
-    const studentClass: number = [9, 10, 11, 12].includes(rawClass) ? rawClass : 12
-    const VALID_EXAM_GOALS = ['HSC Board', 'NEET', 'JEE Mains', 'JEE Advanced']
-    const rawGoal = String(studentProfile?.examGoal ?? 'HSC Board')
-    const examGoal: string = VALID_EXAM_GOALS.includes(rawGoal) ? rawGoal : 'HSC Board'
-    const rawName = String(studentProfile?.studentName ?? 'Student')
-    // Strip anything that could escape the prompt context; keep letters, spaces, basic punctuation
-    const studentName: string = rawName.replace(/[^a-zA-Z\u0900-\u097F\s'.,-]/g, '').slice(0, 50) || 'Student'
+    // ── 4. STUDENT PROFILE ──
+    const studentClass: number = studentProfile?.studentClass ?? 12
+    const examGoal: string = studentProfile?.examGoal ?? 'HSC Board'
+    const studentName: string = studentProfile?.studentName ?? 'Student'
 
-    // Clamp thumbsDownCount to sane range
-    const thumbsDownCount: number = Math.min(Math.max(0, Math.floor(Number(rawThumbsDown) || 0)), 10)
-
-    // ── 5. APPROVAL CHECK ──
-    const userSnap = await adminDb.collection('users').doc(verifiedUid).get()
-    if (!userSnap.exists || !userSnap.data()?.approved) {
-      return NextResponse.json({ error: 'Access not approved. Contact your teacher.', code: 'NOT_APPROVED' }, { status: 403 })
-    }
-
-    // ── 6. DOUBT LIMIT CHECK ──
+    // ── 5. DOUBT LIMIT CHECK ──
     const limitResult = await checkAndIncrement(verifiedUid, studentClass)
 
     if (!limitResult.allowed) {
