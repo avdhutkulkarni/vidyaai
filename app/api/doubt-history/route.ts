@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { adminAuth } from '@/lib/firebaseAdmin'
+import { adminAuth, adminDb } from '@/lib/firebaseAdmin'
 import {
   getDoubtHistory,
   getDoubtById,
@@ -57,7 +57,13 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // ── 2. PARSE PARAMS ──
+    // ── 2. APPROVAL CHECK ──
+    const userSnap = await adminDb.collection('users').doc(verifiedUid).get()
+    if (!userSnap.exists || !userSnap.data()?.approved) {
+      return NextResponse.json({ error: 'Access not approved.', code: 'NOT_APPROVED' }, { status: 403 })
+    }
+
+    // ── 3. PARSE PARAMS ──
     const { searchParams } = new URL(req.url)
     const action = searchParams.get('action') || 'list'
     const doubtId = searchParams.get('doubtId')
@@ -137,7 +143,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // ── 2. PARSE BODY ──
+    // ── 2. APPROVAL CHECK ──
+    const userSnap2 = await adminDb.collection('users').doc(verifiedUid).get()
+    if (!userSnap2.exists || !userSnap2.data()?.approved) {
+      return NextResponse.json({ error: 'Access not approved.', code: 'NOT_APPROVED' }, { status: 403 })
+    }
+
+    // ── 3. PARSE BODY ──
     const body = await req.json()
     const { action, doubtId, resolved } = body
 

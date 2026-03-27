@@ -1,16 +1,45 @@
 'use client'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { signOut, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
+
+async function checkApproval(token: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/auth/check', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const data = await res.json()
+    return data.approved === true
+  } catch {
+    return false
+  }
+}
 
 export default function Home() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const reason = searchParams.get('reason')
+  const [showPending, setShowPending] = useState(false)
 
   useEffect(() => {
-    // If already logged in — go to app
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) router.push('/vidyaai')
+    if (reason === 'pending') {
+      setShowPending(true)
+      return
+    }
+
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const token = await user.getIdToken()
+        const approved = await checkApproval(token)
+        if (approved) {
+          router.push('/vidyaai')
+        } else {
+          await signOut(auth)
+          setShowPending(true)
+        }
+      }
     })
 
     // Connect Google login button from landing page HTML
@@ -22,28 +51,49 @@ export default function Home() {
           e.preventDefault()
           try {
             const provider = new GoogleAuthProvider()
-            await signInWithPopup(auth, provider)
-            router.push('/vidyaai')
-          } catch (err) {
-            console.error(err)
-          }
+            const result = await signInWithPopup(auth, provider)
+            const token = await result.user.getIdToken()
+            const approved = await checkApproval(token)
+            if (approved) {
+              router.push('/vidyaai')
+            } else {
+              await signOut(auth)
+              setShowPending(true)
+            }
+          } catch {}
         })
       }
     }, 500)
 
     return () => { unsub(); clearInterval(interval) }
-  }, [router])
+  }, [router, reason])
+
+  if (showPending) return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+      background: '#0f0f0f', fontFamily: 'system-ui, sans-serif', gap: 16, padding: 24, textAlign: 'center'
+    }}>
+      <div style={{ fontSize: 48 }}>🕐</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: '#f0f0f0' }}>Waiting for Approval</div>
+      <div style={{ fontSize: 14, color: '#888', maxWidth: 320, lineHeight: 1.7 }}>
+        Your account is pending approval.<br />
+        Your teacher will approve you soon.<br />
+        Please check back in a little while. 🙏
+      </div>
+      <button
+        onClick={() => { setShowPending(false); window.history.replaceState({}, '', '/') }}
+        style={{ marginTop: 8, padding: '10px 24px', background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a', borderRadius: 10, cursor: 'pointer', fontSize: 13 }}
+      >
+        Back to home
+      </button>
+    </div>
+  )
 
   return (
     <iframe
       src="/vidyaai-landing-final.html"
-      style={{
-        position: 'fixed',
-        top: 0, left: 0,
-        width: '100%',
-        height: '100%',
-        border: 'none'
-      }}
+      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
     />
   )
 }

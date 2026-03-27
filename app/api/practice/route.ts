@@ -19,7 +19,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Session expired.' }, { status: 401 })
     }
 
-    // ── 2. PARSE BODY ──
+    // ── 2. APPROVAL CHECK ──
+    const userSnap = await adminDb.collection('users').doc(uid).get()
+    if (!userSnap.exists || !userSnap.data()?.approved) {
+      return NextResponse.json({ error: 'Access not approved.', code: 'NOT_APPROVED' }, { status: 403 })
+    }
+
+    // ── 3. PARSE BODY ──
     const { question, type, concept, subject, studentClass } = await req.json()
 
     if (!question || !type) {

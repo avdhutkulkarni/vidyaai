@@ -386,7 +386,13 @@ export async function POST(req: NextRequest) {
     // Clamp thumbsDownCount to sane range
     const thumbsDownCount: number = Math.min(Math.max(0, Math.floor(Number(rawThumbsDown) || 0)), 10)
 
-    // ── 5. DOUBT LIMIT CHECK ──
+    // ── 5. APPROVAL CHECK ──
+    const userSnap = await adminDb.collection('users').doc(verifiedUid).get()
+    if (!userSnap.exists || !userSnap.data()?.approved) {
+      return NextResponse.json({ error: 'Access not approved. Contact your teacher.', code: 'NOT_APPROVED' }, { status: 403 })
+    }
+
+    // ── 6. DOUBT LIMIT CHECK ──
     const limitResult = await checkAndIncrement(verifiedUid, studentClass)
 
     if (!limitResult.allowed) {
