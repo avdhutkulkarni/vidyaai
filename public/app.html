@@ -1080,7 +1080,10 @@ body.day .ct-land{background:linear-gradient(160deg,#E8F4F0,#EEF3F8,var(--bg))}
 function getParam(k){try{return decodeURIComponent(new URLSearchParams(window.location.search).get(k)||'')}catch{return ''}}
 const STUDENT_NAME = getParam('name') || 'Student'
 const STUDENT_LB = getParam('lbname') || 'Student'
-const AUTH_TOKEN = getParam('token') || ''  // Firebase ID token passed from page.tsx
+const AUTH_TOKEN = getParam('token') || ''
+console.log('TOKEN:', AUTH_TOKEN ? 'EXISTS length='+AUTH_TOKEN.length : 'MISSING')
+console.log('NAME:', STUDENT_NAME)
+
 
 // ══ STATE ══
 let cur='sp', selCls='xii', selStream='maths', examGoal='HSC Board',
@@ -1329,7 +1332,7 @@ function updateGreeting(){
 }
 
 function setDailyQuote(){
-  const day=new Date().getDay()+new Date().getDate()
+  const day=new Date().getDate()
   const q=QUOTES[day%QUOTES.length]
   const isMr=q.mr||false
   if(isMr&&(selCls==='xi'||selCls==='xii')){
