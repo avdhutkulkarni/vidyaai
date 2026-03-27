@@ -1704,8 +1704,49 @@ function fbBad(btn){
   thumbsDownCount++
   btn.parentElement.innerHTML='<span style="font-size:.62rem;color:var(--amber);font-weight:700">Trying a different approach...</span>'
   xp(thumbsDownCount>=2?'Getting better explanation...':'Trying different approach...')
-  document.getElementById('ci').value='I am still confused. Please explain this in a completely different way with a new example.'
-  setTimeout(()=>send(),300)
+  const box=document.getElementById('msgs')
+  if(!box)return
+  const msg='I am still confused. Please explain this in a completely different way with a new example.'
+  conversationHistory.push({role:'user',content:msg})
+  const aiDiv=document.createElement('div')
+  aiDiv.className='msg ai'
+  aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Let me try a different way... 🤔</div></div>`
+  box.appendChild(aiDiv)
+  box.scrollTop=box.scrollHeight
+  fetch('/api/ask',{
+    method:'POST',
+    headers:getHeaders(),
+    body:JSON.stringify({
+      question:msg,
+      studentProfile:{studentClass:getStudentClass(),examGoal,studentName:STUDENT_NAME},
+      thumbsDownCount,
+      conversationHistory:conversationHistory.slice(-6),
+      wantsMarathi
+    })
+  })
+  .then(r=>{
+    if(r.status===429)return r.json().then(d=>{throw{limitReached:true,message:d.error}})
+    if(r.status===401)return r.json().then(d=>{throw{authError:true,message:d.error}})
+    return r.json()
+  })
+  .then(data=>{
+    const reply=data.reply||data.error||'Something went wrong.'
+    conversationHistory.push({role:'assistant',content:reply})
+    if(conversationHistory.length>20)conversationHistory=conversationHistory.slice(-20)
+    if(data.used!==undefined)updateDoubtCounter(data.used,data.limit||doubtLimit)
+    aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${formatReply(reply)}</div><div class="mt">Now</div><div class="fbr"><button class="fbb" onclick="fbGood(this)">👍 Got it!</button><button class="fbb" onclick="fbBad(this)">👎 Still confused</button></div></div>`
+    box.scrollTop=box.scrollHeight
+    if(window.MathJax)MathJax.typesetPromise([aiDiv]).catch(()=>{})
+  })
+  .catch(err=>{
+    if(err.limitReached){
+      aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">${err.message}</div></div>`
+    } else if(err.authError){
+      aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Session expired. Please login again. 🙏</div></div>`
+    } else {
+      aiDiv.innerHTML=`<div class="mav">🤖</div><div><div class="mbub">Could not load. Please try again. 🙏</div></div>`
+    }
+  })
 }
 
 // ══ PHOTO UPLOAD (gallery + camera) ══
