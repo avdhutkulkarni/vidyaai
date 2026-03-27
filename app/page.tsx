@@ -51,18 +51,22 @@ function HomeContent() {
   const triggerSignIn = async () => {
     setSigningIn(true)
     const provider = new GoogleAuthProvider()
+    // Set a timeout so we never get stuck on "Signing you in..." forever
+    const timeout = setTimeout(() => setSigningIn(false), 30000)
     try {
-      if (isMobile()) {
-        await signInWithRedirect(auth, provider)
-        // page navigates away — nothing runs after this
+      const result = await signInWithPopup(auth, provider)
+      clearTimeout(timeout)
+      await handleApprovedUser(result.user)
+    } catch (err: unknown) {
+      clearTimeout(timeout)
+      const code = (err as { code?: string })?.code || ''
+      if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // Popup was blocked — fall back to redirect
+        try { await signInWithRedirect(auth, provider) }
+        catch { setSigningIn(false) }
       } else {
-        const result = await signInWithPopup(auth, provider)
-        await handleApprovedUser(result.user)
+        setSigningIn(false)
       }
-    } catch {
-      // popup blocked — try redirect
-      try { await signInWithRedirect(auth, new GoogleAuthProvider()) }
-      catch { setSigningIn(false) }
     }
   }
 
