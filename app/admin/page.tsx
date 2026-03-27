@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import {
-  onAuthStateChanged, signInWithPopup, signOut,
-  GoogleAuthProvider, User
+  onAuthStateChanged, signInWithPopup, signInWithRedirect,
+  getRedirectResult, signOut, GoogleAuthProvider, User
 } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 
@@ -68,6 +68,8 @@ export default function AdminPage() {
   }, [getToken])
 
   useEffect(() => {
+    // Handle redirect result first (mobile sign-in)
+    getRedirectResult(auth).catch(() => {})
     const unsub = onAuthStateChanged(auth, u => {
       setUser(u)
       setAuthLoading(false)
@@ -144,7 +146,12 @@ export default function AdminPage() {
       <div style={{ fontSize: 26, fontWeight: 800, color: C.t1 }}>Admin Panel</div>
       <div style={{ fontSize: 13, color: C.t2 }}>Sign in with your admin Google account to continue</div>
       <button
-        onClick={() => signInWithPopup(auth, new GoogleAuthProvider()).catch(() => {})}
+        onClick={() => {
+          const p = new GoogleAuthProvider()
+          const mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
+          if (mobile) { signInWithRedirect(auth, p).catch(() => {}) }
+          else { signInWithPopup(auth, p).catch(() => signInWithRedirect(auth, p).catch(() => {})) }
+        }}
         style={{ marginTop: 8, padding: '13px 32px', background: C.cyan, color: '#000', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
       >
         Sign in with Google
