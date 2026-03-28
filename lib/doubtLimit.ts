@@ -1,98 +1,143 @@
 import { adminDb } from '@/lib/firebaseAdmin'
 
-const FREE_LIMIT_CLASS_9_10 = 20
-const FREE_LIMIT_CLASS_11_12 = 25
-const BOOST_TOTAL = 200
+// ─────────────────────────────────────────
+// LIMITS — LOCKED
+// ─────────────────────────────────────────
+
+const FREE_PHOTO_LIMIT_9_10 = 8
+const FREE_TEXT_LIMIT_9_10 = 12
+
+const FREE_PHOTO_LIMIT_11_12 = 10
+const FREE_TEXT_LIMIT_11_12 = 15
+
+const BOOST_PHOTO_TOTAL = 50
+const BOOST_TEXT_TOTAL = 100
+
 const WARNING_PERCENTAGE = 0.8
 
-export function getDailyLimit(studentClass: number): number {
-  return studentClass === 9 || studentClass === 10
-    ? FREE_LIMIT_CLASS_9_10
-    : FREE_LIMIT_CLASS_11_12
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+
+export function getDailyLimits(studentClass: number): { photo: number; text: number; total: number } {
+  if (studentClass === 9 || studentClass === 10) {
+    return { photo: FREE_PHOTO_LIMIT_9_10, text: FREE_TEXT_LIMIT_9_10, total: FREE_PHOTO_LIMIT_9_10 + FREE_TEXT_LIMIT_9_10 }
+  }
+  return { photo: FREE_PHOTO_LIMIT_11_12, text: FREE_TEXT_LIMIT_11_12, total: FREE_PHOTO_LIMIT_11_12 + FREE_TEXT_LIMIT_11_12 }
 }
 
 function getTodayIST(): string {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
 }
 
-function getWarningMessage(remaining: number): string {
-  return `Only ${remaining} doubt${remaining === 1 ? '' : 's'} left for today. Boost your plan — 200 doubts for just ₹49! 🚀`
+function getWarningMessage(remaining: number, type: 'photo' | 'text'): string {
+  return `Only ${remaining} ${type} doubt${remaining === 1 ? '' : 's'} left for today. Boost for just ₹79 — 50 photo + 100 text doubts! 🚀`
 }
 
-function getLimitMessage(studentClass: number): string {
-  const limit = getDailyLimit(studentClass)
-  return `You have used all ${limit} doubts for today! 🎯 Get 200 doubts for just ₹49 — valid for 1 year! 🚀`
+function getLimitMessage(studentClass: number, type: 'photo' | 'text'): string {
+  if (type === 'photo') {
+    const limit = studentClass === 9 || studentClass === 10 ? FREE_PHOTO_LIMIT_9_10 : FREE_PHOTO_LIMIT_11_12
+    return `You have used all ${limit} photo doubts for today! 📷 You can still ask ${studentClass === 9 || studentClass === 10 ? FREE_TEXT_LIMIT_9_10 : FREE_TEXT_LIMIT_11_12} text doubts. Or boost for ₹79 — 50 photo + 100 text! 🚀`
+  }
+  const limit = studentClass === 9 || studentClass === 10 ? FREE_TEXT_LIMIT_9_10 : FREE_TEXT_LIMIT_11_12
+  return `You have used all ${limit} text doubts for today! 🎯 Get 50 photo + 100 text doubts for just ₹79 — valid for 1 year! 🚀`
 }
 
 function getBoostMessage(reason: 'boost_exhausted' | 'boost_expired'): string {
-  if (reason === 'boost_exhausted') {
-    return 'You have used all 200 boost doubts! Get 200 more doubts for just ₹49. 🎯'
-  }
-  return 'Your boost plan has expired. Get 200 doubts for just ₹49 — valid for 1 year! 🔄'
+  if (reason === 'boost_exhausted') return 'You have used all boost doubts! Get 50 photo + 100 text doubts for just ₹79. 🎯'
+  return 'Your boost plan has expired. Get 50 photo + 100 text doubts for just ₹79 — valid for 1 year! 🔄'
 }
 
-export async function checkAndIncrement(uid: string, studentClass: number): Promise<{
+// ─────────────────────────────────────────
+// MAIN CHECK AND INCREMENT
+// ─────────────────────────────────────────
+
+export async function checkAndIncrement(
+  uid: string,
+  studentClass: number,
+  isPhoto: boolean = false
+): Promise<{
   allowed: boolean
   used: number
   limit: number
+  usedPhoto: number
+  usedText: number
+  limitPhoto: number
+  limitText: number
   isPaid: boolean
   warning: boolean
   warningMessage: string
   limitMessage: string
 }> {
   const today = getTodayIST()
-  const dailyLimit = getDailyLimit(studentClass)
+  const limits = getDailyLimits(studentClass)
   const now = new Date()
+  const type = isPhoto ? 'photo' : 'text'
 
   const userRef = adminDb.collection('users').doc(uid)
   const userSnap = await userRef.get()
   const userData = userSnap.data() || {}
 
-  // Check boost expired
+  // ── BOOST EXPIRED ──
   if (userData.plan === 'boost' && userData.boostExpiresAt?.toDate() < now) {
     await userRef.set({ plan: 'free' }, { merge: true })
     return {
-      allowed: false,
-      used: 0,
-      limit: dailyLimit,
-      isPaid: false,
-      warning: false,
-      warningMessage: '',
+      allowed: false, used: 0, limit: limits.total,
+      usedPhoto: 0, usedText: 0, limitPhoto: limits.photo, limitText: limits.text,
+      isPaid: false, warning: false, warningMessage: '',
       limitMessage: getBoostMessage('boost_expired')
     }
   }
 
-  // Check boost exhausted
-  if (userData.plan === 'boost' && userData.boostDoubtsUsed >= BOOST_TOTAL) {
-    return {
-      allowed: false,
-      used: userData.boostDoubtsUsed,
-      limit: BOOST_TOTAL,
-      isPaid: false,
-      warning: false,
-      warningMessage: '',
-      limitMessage: getBoostMessage('boost_exhausted')
+  // ── BOOST EXHAUSTED ──
+  const boostPhotoUsed = userData.boostPhotoUsed || 0
+  const boostTextUsed = userData.boostTextUsed || 0
+  if (userData.plan === 'boost') {
+    if (isPhoto && boostPhotoUsed >= BOOST_PHOTO_TOTAL) {
+      return {
+        allowed: false, used: boostPhotoUsed + boostTextUsed, limit: BOOST_PHOTO_TOTAL + BOOST_TEXT_TOTAL,
+        usedPhoto: boostPhotoUsed, usedText: boostTextUsed,
+        limitPhoto: BOOST_PHOTO_TOTAL, limitText: BOOST_TEXT_TOTAL,
+        isPaid: true, warning: false, warningMessage: '',
+        limitMessage: `You have used all ${BOOST_PHOTO_TOTAL} boost photo doubts! You still have ${BOOST_TEXT_TOTAL - boostTextUsed} text doubts. 📝`
+      }
+    }
+    if (!isPhoto && boostTextUsed >= BOOST_TEXT_TOTAL) {
+      return {
+        allowed: false, used: boostPhotoUsed + boostTextUsed, limit: BOOST_PHOTO_TOTAL + BOOST_TEXT_TOTAL,
+        usedPhoto: boostPhotoUsed, usedText: boostTextUsed,
+        limitPhoto: BOOST_PHOTO_TOTAL, limitText: BOOST_TEXT_TOTAL,
+        isPaid: true, warning: false, warningMessage: '',
+        limitMessage: getBoostMessage('boost_exhausted')
+      }
     }
   }
 
-  // Active boost plan
+  // ── ACTIVE BOOST ──
   const boostActive =
     userData.plan === 'boost' &&
-    userData.boostDoubtsUsed < BOOST_TOTAL &&
+    (boostPhotoUsed < BOOST_PHOTO_TOTAL || boostTextUsed < BOOST_TEXT_TOTAL) &&
     userData.boostExpiresAt?.toDate() > now
 
   if (boostActive) {
-    const boostUsed = (userData.boostDoubtsUsed || 0) + 1
+    const newPhotoUsed = isPhoto ? boostPhotoUsed + 1 : boostPhotoUsed
+    const newTextUsed = !isPhoto ? boostTextUsed + 1 : boostTextUsed
+
     await userRef.set({
-      boostDoubtsUsed: boostUsed,
+      boostPhotoUsed: newPhotoUsed,
+      boostTextUsed: newTextUsed,
       lastActive: now,
       totalDoubts: (userData.totalDoubts || 0) + 1
     }, { merge: true })
 
     return {
       allowed: true,
-      used: boostUsed,
-      limit: BOOST_TOTAL,
+      used: newPhotoUsed + newTextUsed,
+      limit: BOOST_PHOTO_TOTAL + BOOST_TEXT_TOTAL,
+      usedPhoto: newPhotoUsed,
+      usedText: newTextUsed,
+      limitPhoto: BOOST_PHOTO_TOTAL,
+      limitText: BOOST_TEXT_TOTAL,
       isPaid: true,
       warning: false,
       warningMessage: '',
@@ -100,39 +145,58 @@ export async function checkAndIncrement(uid: string, studentClass: number): Prom
     }
   }
 
-  // Free tier — check daily count
-  const usageRef = adminDb
-    .collection('usage')
-    .doc(uid)
-    .collection('daily')
-    .doc(today)
-
+  // ── FREE TIER ──
+  const usageRef = adminDb.collection('usage').doc(uid).collection('daily').doc(today)
   const usageSnap = await usageRef.get()
-  const usedToday = usageSnap.exists ? (usageSnap.data()?.count || 0) : 0
+  const usageData = usageSnap.exists ? usageSnap.data()! : { photoCount: 0, textCount: 0 }
 
-  // Daily limit hit
-  if (usedToday >= dailyLimit) {
+  const usedPhoto = usageData.photoCount || 0
+  const usedText = usageData.textCount || 0
+
+  // ── CHECK IF PHOTO LIMIT HIT BUT TEXT AVAILABLE ──
+  // Unused photo doubts can convert to text doubts
+  const effectivePhotoLimit = limits.photo
+  const unusedPhotoDoubts = Math.max(0, effectivePhotoLimit - usedPhoto)
+  const effectiveTextLimit = limits.text + unusedPhotoDoubts  // convert unused photos to text
+
+  // Photo limit check
+  if (isPhoto && usedPhoto >= limits.photo) {
     return {
       allowed: false,
-      used: usedToday,
-      limit: dailyLimit,
-      isPaid: false,
-      warning: false,
-      warningMessage: '',
-      limitMessage: getLimitMessage(studentClass)
+      used: usedPhoto + usedText,
+      limit: limits.total,
+      usedPhoto, usedText,
+      limitPhoto: limits.photo,
+      limitText: limits.text,
+      isPaid: false, warning: false, warningMessage: '',
+      limitMessage: getLimitMessage(studentClass, 'photo')
     }
   }
 
-  // Increment daily count
-  const newCount = usedToday + 1
+  // Text limit check — includes converted unused photo doubts
+  if (!isPhoto && usedText >= effectiveTextLimit) {
+    return {
+      allowed: false,
+      used: usedPhoto + usedText,
+      limit: limits.total,
+      usedPhoto, usedText,
+      limitPhoto: limits.photo,
+      limitText: effectiveTextLimit,
+      isPaid: false, warning: false, warningMessage: '',
+      limitMessage: getLimitMessage(studentClass, 'text')
+    }
+  }
+
+  // ── INCREMENT ──
+  const newPhotoCount = isPhoto ? usedPhoto + 1 : usedPhoto
+  const newTextCount = !isPhoto ? usedText + 1 : usedText
+
   await usageRef.set({
-    count: newCount,
-    uid,
-    date: today,
-    lastUsed: now
+    photoCount: newPhotoCount,
+    textCount: newTextCount,
+    uid, date: today, lastUsed: now
   }, { merge: true })
 
-  // Update user record
   await userRef.set({
     totalDoubts: (userData.totalDoubts || 0) + 1,
     lastActive: now,
@@ -140,31 +204,45 @@ export async function checkAndIncrement(uid: string, studentClass: number): Prom
     plan: userData.plan || 'free'
   }, { merge: true })
 
-  // Warning check
-  const warningThreshold = Math.floor(dailyLimit * WARNING_PERCENTAGE)
-  const remaining = dailyLimit - newCount
-  const warning = newCount >= warningThreshold
+  // ── WARNING CHECK ──
+  const currentTypeUsed = isPhoto ? newPhotoCount : newTextCount
+  const currentTypeLimit = isPhoto ? limits.photo : effectiveTextLimit
+  const warningThreshold = Math.floor(currentTypeLimit * WARNING_PERCENTAGE)
+  const remaining = currentTypeLimit - currentTypeUsed
+  const warning = currentTypeUsed >= warningThreshold
 
   return {
     allowed: true,
-    used: newCount,
-    limit: dailyLimit,
+    used: newPhotoCount + newTextCount,
+    limit: limits.total,
+    usedPhoto: newPhotoCount,
+    usedText: newTextCount,
+    limitPhoto: limits.photo,
+    limitText: effectiveTextLimit,
     isPaid: false,
     warning,
-    warningMessage: warning ? getWarningMessage(remaining) : '',
+    warningMessage: warning ? getWarningMessage(remaining, type) : '',
     limitMessage: ''
   }
 }
 
+// ─────────────────────────────────────────
+// GET TODAY'S USAGE
+// ─────────────────────────────────────────
+
 export async function getUsageToday(uid: string, studentClass: number): Promise<{
   used: number
   limit: number
+  usedPhoto: number
+  usedText: number
+  limitPhoto: number
+  limitText: number
   isPaid: boolean
-  boostDoubtsUsed: number
-  boostDoubtsRemaining: number
+  boostPhotoRemaining: number
+  boostTextRemaining: number
 }> {
   const today = getTodayIST()
-  const dailyLimit = getDailyLimit(studentClass)
+  const limits = getDailyLimits(studentClass)
   const now = new Date()
 
   const userSnap = await adminDb.collection('users').doc(uid).get()
@@ -172,33 +250,40 @@ export async function getUsageToday(uid: string, studentClass: number): Promise<
 
   const boostActive =
     userData.plan === 'boost' &&
-    userData.boostDoubtsUsed < BOOST_TOTAL &&
     userData.boostExpiresAt?.toDate() > now
 
   if (boostActive) {
+    const boostPhotoUsed = userData.boostPhotoUsed || 0
+    const boostTextUsed = userData.boostTextUsed || 0
     return {
-      used: userData.boostDoubtsUsed || 0,
-      limit: BOOST_TOTAL,
+      used: boostPhotoUsed + boostTextUsed,
+      limit: BOOST_PHOTO_TOTAL + BOOST_TEXT_TOTAL,
+      usedPhoto: boostPhotoUsed,
+      usedText: boostTextUsed,
+      limitPhoto: BOOST_PHOTO_TOTAL,
+      limitText: BOOST_TEXT_TOTAL,
       isPaid: true,
-      boostDoubtsUsed: userData.boostDoubtsUsed || 0,
-      boostDoubtsRemaining: BOOST_TOTAL - (userData.boostDoubtsUsed || 0)
+      boostPhotoRemaining: BOOST_PHOTO_TOTAL - boostPhotoUsed,
+      boostTextRemaining: BOOST_TEXT_TOTAL - boostTextUsed
     }
   }
 
-  const usageSnap = await adminDb
-    .collection('usage')
-    .doc(uid)
-    .collection('daily')
-    .doc(today)
-    .get()
-
-  const usedToday = usageSnap.exists ? (usageSnap.data()?.count || 0) : 0
+  const usageSnap = await adminDb.collection('usage').doc(uid).collection('daily').doc(today).get()
+  const usageData = usageSnap.exists ? usageSnap.data()! : { photoCount: 0, textCount: 0 }
+  const usedPhoto = usageData.photoCount || 0
+  const usedText = usageData.textCount || 0
+  const unusedPhotoDoubts = Math.max(0, limits.photo - usedPhoto)
+  const effectiveTextLimit = limits.text + unusedPhotoDoubts
 
   return {
-    used: usedToday,
-    limit: dailyLimit,
+    used: usedPhoto + usedText,
+    limit: limits.total,
+    usedPhoto,
+    usedText,
+    limitPhoto: limits.photo,
+    limitText: effectiveTextLimit,
     isPaid: false,
-    boostDoubtsUsed: 0,
-    boostDoubtsRemaining: 0
+    boostPhotoRemaining: 0,
+    boostTextRemaining: 0
   }
 }
